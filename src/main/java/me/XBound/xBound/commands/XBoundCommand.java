@@ -82,6 +82,90 @@ public class XBoundCommand implements CommandExecutor {
                 break;
         }
 
+            // ================= Discord Command =================
+            case "discord" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
+                    return true;
+                }
+                sendDiscordLink(player);
+            }
+
+            // ================= Prefix / Suffix Commands =================
+            case "prefix", "suffix", "clearprefix", "clearsuffix" -> {
+                if (args.length < 2) {
+                    sender.sendMessage(Component.text("You must specify a player!", NamedTextColor.RED));
+                    return true;
+                }
+                Player target = Bukkit.getPlayer(args[1]);
+                if (target == null) {
+                    sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
+                    return true;
+                }
+
+                switch (sub) {
+                    case "prefix" -> {
+                        if (args.length < 3) {
+                            sender.sendMessage(Component.text("Usage: /" + label + " prefix <player> <text>", NamedTextColor.RED));
+                            return true;
+                        }
+                        String prefix = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                        prefixes.put(target.getUniqueId(), Component.text(prefix, NamedTextColor.GOLD));
+                        plugin.savePrefixSuffix();
+                        plugin.updatePlayerName(target);
+                        sender.sendMessage(Component.text("Prefix set!", NamedTextColor.GREEN));
+                    }
+                    case "suffix" -> {
+                        if (args.length < 3) {
+                            sender.sendMessage(Component.text("Usage: /" + label + " suffix <player> <text>", NamedTextColor.RED));
+                            return true;
+                        }
+                        String suffix = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                        suffixes.put(target.getUniqueId(), Component.text(suffix, NamedTextColor.AQUA));
+                        plugin.savePrefixSuffix();
+                        plugin.updatePlayerName(target);
+                        sender.sendMessage(Component.text("Suffix set!", NamedTextColor.GREEN));
+                    }
+                    case "clearprefix" -> {
+                        prefixes.remove(target.getUniqueId());
+                        plugin.savePrefixSuffix();
+                        plugin.updatePlayerName(target);
+                        sender.sendMessage(Component.text("Prefix cleared!", NamedTextColor.GREEN));
+                    }
+                    case "clearsuffix" -> {
+                        suffixes.remove(target.getUniqueId());
+                        plugin.savePrefixSuffix();
+                        plugin.updatePlayerName(target);
+                        sender.sendMessage(Component.text("Suffix cleared!", NamedTextColor.GREEN));
+                    }
+                }
+            }
+
+            // ================= Border Command =================
+            case "setbordermiddle" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(Component.text("Only players can run this command!", NamedTextColor.RED));
+                    return true;
+                }
+                if (!player.hasPermission("xbound.setbordermiddle")) {
+                    player.sendMessage(Component.text("You do not have permission to run this command.", NamedTextColor.RED));
+                    return true;
+                }
+
+                double x = player.getLocation().getX();
+                double z = player.getLocation().getZ();
+                player.getWorld().getWorldBorder().setCenter(x, z);
+
+                plugin.getDataConfig().set("border.center-x", x);
+                plugin.getDataConfig().set("border.center-z", z);
+                plugin.saveDataFile();
+
+                player.sendMessage(Component.text("World border center set to your location!", NamedTextColor.GREEN));
+            }
+
+            default -> sender.sendMessage(Component.text("Unknown subcommand! Use /" + label + " for help.", NamedTextColor.RED));
+        }
+
         return true;
     }
 }
