@@ -168,4 +168,38 @@ public class XBoundCommand implements CommandExecutor {
 
         return true;
     }
+
+    private void sendHelp(CommandSender sender, String label) {
+        sender.sendMessage(Component.text("==== XBound Commands ====", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("/" + label + " reloadrules", NamedTextColor.GRAY).append(Component.text(" - Reloads rules.yml", NamedTextColor.DARK_GRAY)));
+        sender.sendMessage(Component.text("/" + label + " reloadconfig", NamedTextColor.GRAY).append(Component.text(" - Reloads config.yml", NamedTextColor.DARK_GRAY)));
+        sender.sendMessage(Component.text("/" + label + " reloaddata", NamedTextColor.GRAY).append(Component.text(" - Reloads data.yml", NamedTextColor.DARK_GRAY)));
+        sender.sendMessage(Component.text("/" + label + " reload", NamedTextColor.GRAY).append(Component.text(" - Reloads all plugin files", NamedTextColor.DARK_GRAY)));
+        sender.sendMessage(Component.text("/" + label + " discord", NamedTextColor.GRAY).append(Component.text(" - Shows the Discord invite link", NamedTextColor.DARK_GRAY)));
+        sender.sendMessage(Component.text("/" + label + " prefix <player> <text>", NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("/" + label + " suffix <player> <text>", NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("/" + label + " clearprefix <player>", NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("/" + label + " clearsuffix <player>", NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("/" + label + " setbordermiddle", NamedTextColor.GRAY));
+    }
+
+    private boolean checkPerm(CommandSender sender) {
+        if (!sender.hasPermission("xbound.reload")) {
+            sender.sendMessage(Component.text("You do not have permission to use this command.", NamedTextColor.RED));
+            return true;
+        }
+        return false;
+    }
+
+    private void sendDiscordLink(Player player) {
+        String link = plugin.getConfig().getString("discord.link", "https://discord.gg/example");
+        String message = plugin.getConfig().getString("discord.message", "Join our Discord here!");
+        String hover = plugin.getConfig().getString("discord.hover", "Click to open the Discord");
+
+        Component clickableMessage = Component.text(message, NamedTextColor.AQUA)
+                .clickEvent(ClickEvent.openUrl(link))
+                .hoverEvent(HoverEvent.showText(Component.text(hover, NamedTextColor.YELLOW)));
+
+        player.sendMessage(clickableMessage);
+    }
 }
