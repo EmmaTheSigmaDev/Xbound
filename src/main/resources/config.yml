@@ -21,3 +21,38 @@ tablist:
   footer:
     - "§eHave fun!"
     - "§6Border grows as you gain XP!"
+
+# ==================================
+# Discord Event Feed Settings
+# ==================================
+
+# Discord webhook URL where messages will be sent
+webhook-url: "https://discord.com/api/webhooks/XXXX/YYYY"
+
+# Toggle which events are sent to Discord
+events:
+  join: true
+  leave: true
+  chat: true
+  command: true
+  death: true
+  advancement: true
+  kick: true
+  server-start: true
+  server-stop: true
+
+# Message formats
+# Placeholders: {player}, {message}, {reason}, {advancement}
+messages:
+  join: "**{player}** joined the game."
+  leave: "**{player}** left the game."
+  chat: "{player}: {message}"
+  command: "{player} ran command: {message}"
+  death: "☠ {message}"
+  advancement: "🏆 {player} has made the advancement **{advancement}**"
+  kick: "🚪 {player} was kicked for: {reason}"
+  server-start: "🖥 Server has started!"
+  server-stop: "🛑 Server is stopping!"
+
+# Debug mode — when true, extra logging will be shown in console
+debug: false
