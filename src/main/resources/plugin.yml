@@ -16,6 +16,8 @@ commands:
     description: Manage your prefix or suffix.
     usage: /xbound <prefix|suffix> <text>
     permission: xbound.modify
+  discord:
+    description: Sends the Discord link
 
 permissions:
   xbound.bypassborder:
