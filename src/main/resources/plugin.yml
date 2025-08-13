@@ -18,6 +18,8 @@ commands:
     permission: xbound.modify
   discord:
     description: Sends the Discord link
+  Rules:
+    description: Rules command
 
 permissions:
   xbound.bypassborder:
