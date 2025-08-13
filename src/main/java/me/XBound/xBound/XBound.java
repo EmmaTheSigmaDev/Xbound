@@ -126,6 +126,9 @@ public final class XBound extends JavaPlugin implements Listener {
         if (config.getBoolean("events.server-stop", true)) {
             sendToDiscord(config.getString("messages.server-stop"));
         }
+        if (jda != null) {
+            jda.shutdown();
+        }
     }
 
     public static XBound getInstance() {
