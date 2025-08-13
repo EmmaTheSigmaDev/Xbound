@@ -162,7 +162,7 @@ public final class XBound extends JavaPlugin implements Listener {
         }
         try {
             jda = JDABuilder.createDefault(getConfig().getString("discord.bot-token"))
-                    .addEventListeners(new DiscordToMinecraftListener())
+                    .addEventListeners(new DiscordToMinecraftListener(webhookUrl))
                     .build();
         } catch (Exception e) {
             getLogger().severe("Failed to restart Discord bot: " + e.getMessage());
