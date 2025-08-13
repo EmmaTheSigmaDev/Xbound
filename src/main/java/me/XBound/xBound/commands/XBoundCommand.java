@@ -184,6 +184,10 @@ public class XBoundCommand implements CommandExecutor {
                         border.getCenter().getZ()
                 );
 
+                player.teleport(center);
+                player.sendMessage(Component.text("Teleported to the center of the border!", NamedTextColor.GREEN));
+                break;
+            }
             default -> sender.sendMessage(Component.text("Unknown subcommand! Use /" + label + " for help.", NamedTextColor.RED));
         }
 
