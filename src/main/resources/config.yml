@@ -16,7 +16,7 @@ world: world
 # Tablist header and footer
 tablist:
   header:
-    - "§aWelcome to §cXBound§&a!"
+    - "§aWelcome to §cXBound§a!"
     - "§7Your XP contributes to the border size."
   footer:
     - "§eHave fun!"
