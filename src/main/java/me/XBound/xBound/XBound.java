@@ -106,7 +106,7 @@ public final class XBound extends JavaPlugin implements Listener {
         reloadRulesFile();
         reloadDataFile();
 
-        Objects.requireNonNull(getCommand("xbound")).setExecutor(new XBoundCommand(this));
+        Objects.requireNonNull(getCommand("xbound")).setExecutor(new XBoundCommand(this, prefixes, suffixes));
         Objects.requireNonNull(getCommand("discord")).setExecutor(new DiscordCommand(this));
         Objects.requireNonNull(getCommand("rules")).setExecutor(new RulesCommand(this));
 
