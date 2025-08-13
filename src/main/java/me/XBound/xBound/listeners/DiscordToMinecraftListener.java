@@ -35,7 +35,8 @@ public class DiscordToMinecraftListener extends ListenerAdapter {
     private final String channelId;
 
     public DiscordToMinecraftListener(String channelId) {
-        this.channelId = channelId;
+        FileConfiguration config = XBound.getInstance().getConfig();
+        this.channelId = config.getString("discord.channel-id", "");
     }
 
     @Override
