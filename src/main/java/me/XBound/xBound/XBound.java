@@ -204,12 +204,6 @@ public final class XBound extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        loadPlayerXp(event.getPlayer().getUniqueId());
-        updateBorder();
-    }
-
-    @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         savePlayerXp(event.getPlayer().getUniqueId());
         saveBorder();
