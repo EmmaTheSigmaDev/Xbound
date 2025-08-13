@@ -25,6 +25,7 @@
 package me.XBound.xBound;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import me.XBound.xBound.commands.BorderCenterCommand;
 import me.XBound.xBound.commands.DiscordCommand;
 import me.XBound.xBound.commands.RulesCommand;
 import me.XBound.xBound.commands.XBoundCommand;
@@ -109,6 +110,7 @@ public final class XBound extends JavaPlugin implements Listener {
         Objects.requireNonNull(getCommand("xbound")).setExecutor(new XBoundCommand(this, prefixes, suffixes));
         Objects.requireNonNull(getCommand("discord")).setExecutor(new DiscordCommand(this));
         Objects.requireNonNull(getCommand("rules")).setExecutor(new RulesCommand(this));
+        Objects.requireNonNull(getCommand("bordercenter")).setExecutor(new BorderCenterCommand());
 
         // Load config values
         config = getConfig();
