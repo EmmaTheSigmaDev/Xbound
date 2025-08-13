@@ -1,3 +1,7 @@
+# ==================================
+# World Border XP Growth Settings
+# ==================================
+
 # Base size of the world border in blocks
 base-border-size: 50
 
