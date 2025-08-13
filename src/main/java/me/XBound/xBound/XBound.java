@@ -171,6 +171,9 @@ public final class XBound extends JavaPlugin implements Listener {
         }
     }
 
+    public FileConfiguration getDataConfig() {
+        return dataConfig;
+    }
 
     private void loadConfig() {
         FileConfiguration cfg = getConfig();
