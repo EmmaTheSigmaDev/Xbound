@@ -42,7 +42,7 @@ public class DiscordToMinecraftListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
-        if (!event.getChannel().getId().equals("YOUR_CHANNEL_ID")) return;
+        if (!event.getChannel().getId().equals(channelId)) return; // now using config value
 
         String content = event.getMessage().getContentDisplay();
         Bukkit.getScheduler().runTask(XBound.getInstance(), () -> {
