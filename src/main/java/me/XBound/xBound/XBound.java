@@ -206,7 +206,7 @@ public final class XBound extends JavaPlugin implements Listener {
         dataConfig = YamlConfiguration.loadConfiguration(dataFile); // <— actually load it
     }
 
-    private void saveDataFile() {
+    public void saveDataFile() {
         try {
             dataConfig.save(dataFile);
         } catch (IOException e) {
