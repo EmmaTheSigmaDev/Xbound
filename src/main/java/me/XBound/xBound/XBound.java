@@ -420,4 +420,88 @@ public final class XBound extends JavaPlugin implements Listener {
             updateBorderForXP(player, xp);
         }, 1L);
     }
+
+    private void sendToDiscord(String message) {
+        if (webhookUrl == null || webhookUrl.isEmpty()) return;
+        if (message == null || message.isEmpty()) return;
+
+        String jsonPayload = "{\"content\":\"" + message.replace("\"", "\\\"") + "\"}";
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(webhookUrl))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
+                .build();
+
+        // Run async to avoid blocking the server thread
+        httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding())
+                .exceptionally(e -> {
+                    getLogger().warning("Failed to send message to Discord: " + e.getMessage());
+                    return null;
+                });
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        loadPlayerXp(event.getPlayer().getUniqueId());
+        updateBorder();
+
+        if (config.getBoolean("events.join", true)) {
+            sendToDiscord(Objects.requireNonNull(config.getString("messages.join")).replace("{player}", event.getPlayer().getName()));
+        }
+    }
+
+    @EventHandler
+    public void onLeave(PlayerQuitEvent event) {
+        if (config.getBoolean("events.leave", true)) {
+            sendToDiscord(Objects.requireNonNull(config.getString("messages.leave")).replace("{player}", event.getPlayer().getName()));
+        }
+    }
+
+    @EventHandler
+    public void onChat(AsyncChatEvent event) {
+        if (config.getBoolean("events.chat", true)) {
+            String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+            sendToDiscord(Objects.requireNonNull(config.getString("messages.chat"))
+                    .replace("{player}", event.getPlayer().getName())
+                    .replace("{message}", message));
+        }
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        if (!config.getBoolean("events.death", true)) return;
+
+        Component deathComponent = event.deathMessage();
+        String deathMsg = (deathComponent != null)
+                ? PlainTextComponentSerializer.plainText().serialize(deathComponent)
+                : "died";
+
+        sendToDiscord(Objects.requireNonNull(config.getString("messages.death"))
+                .replace("{player}", event.getEntity().getName())
+                .replace("{message}", deathMsg));
+    }
+
+    @EventHandler
+    public void onAdvancement(PlayerAdvancementDoneEvent event) {
+        if (config.getBoolean("events.advancement", true)) {
+            String advName = event.getAdvancement().getKey().getKey();
+            if (!advName.contains("recipes/")) { // avoid recipe spam
+                sendToDiscord(Objects.requireNonNull(config.getString("messages.advancement"))
+                        .replace("{player}", event.getPlayer().getName())
+                        .replace("{advancement}", advName.replace("_", " ")));
+            }
+        }
+    }
+
+    @EventHandler
+    public void onKick(PlayerKickEvent event) {
+        if (!config.getBoolean("events.kick", true)) return;
+
+        String reason = PlainTextComponentSerializer.plainText().serialize(event.reason());
+
+        sendToDiscord(Objects.requireNonNull(config.getString("messages.kick"))
+                .replace("{player}", event.getPlayer().getName())
+                .replace("{reason}", reason));
+    }
 }
