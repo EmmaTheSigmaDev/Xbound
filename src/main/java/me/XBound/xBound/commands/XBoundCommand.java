@@ -67,10 +67,15 @@ public class XBoundCommand implements CommandExecutor {
 
             case "reloadconfig":
                 plugin.reloadConfig();
-                sender.sendMessage(Component.text("Config file reloaded!").color(NamedTextColor.GREEN));
-                break;
-
-            case "reload":
+                sender.sendMessage(Component.text("Config file reloaded!", NamedTextColor.GREEN));
+            }
+            case "reloaddata" -> {
+                if (checkPerm(sender)) return true;
+                plugin.reloadDataFile();
+                sender.sendMessage(Component.text("Data file reloaded!", NamedTextColor.GREEN));
+            }
+            case "reload" -> {
+                if (checkPerm(sender)) return true;
                 plugin.reloadConfig();
                 plugin.reloadRulesFile();
                 plugin.reloadDataFile();
