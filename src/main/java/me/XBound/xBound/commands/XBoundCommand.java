@@ -49,13 +49,7 @@ public class XBoundCommand implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage:").color(NamedTextColor.YELLOW));
-            sender.sendMessage(Component.text("/" + label + " reloadrules").color(NamedTextColor.GRAY)
-                    .append(Component.text(" - Reloads rules.yml").color(NamedTextColor.DARK_GRAY)));
-            sender.sendMessage(Component.text("/" + label + " reloadconfig").color(NamedTextColor.GRAY)
-                    .append(Component.text(" - Reloads config.yml").color(NamedTextColor.DARK_GRAY)));
-            sender.sendMessage(Component.text("/" + label + " reload").color(NamedTextColor.GRAY)
-                    .append(Component.text(" - Reloads all plugin files").color(NamedTextColor.DARK_GRAY)));
+            sendHelp(sender, label);
             return true;
         }
 
