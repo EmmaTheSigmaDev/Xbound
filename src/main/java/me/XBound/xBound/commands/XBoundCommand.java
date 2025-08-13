@@ -206,6 +206,7 @@ public class XBoundCommand implements CommandExecutor {
         sender.sendMessage(Component.text("/" + label + " clearprefix <player>", NamedTextColor.GRAY));
         sender.sendMessage(Component.text("/" + label + " clearsuffix <player>", NamedTextColor.GRAY));
         sender.sendMessage(Component.text("/" + label + " setbordermiddle", NamedTextColor.GRAY));
+        sender.sendMessage(Component.text("/" + label + " bordercenter", NamedTextColor.GRAY));
     }
 
     private boolean checkPerm(CommandSender sender) {
