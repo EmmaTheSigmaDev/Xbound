@@ -62,10 +62,10 @@ public class XBoundCommand implements CommandExecutor {
         switch (args[0].toLowerCase()) {
             case "reloadrules":
                 plugin.reloadRulesFile();
-                sender.sendMessage(Component.text("Rules file reloaded!").color(NamedTextColor.GREEN));
-                break;
-
-            case "reloadconfig":
+                sender.sendMessage(Component.text("Rules file reloaded!", NamedTextColor.GREEN));
+            }
+            case "reloadconfig" -> {
+                if (checkPerm(sender)) return true;
                 plugin.reloadConfig();
                 sender.sendMessage(Component.text("Config file reloaded!", NamedTextColor.GREEN));
             }
