@@ -192,7 +192,6 @@ public class XBoundCommand implements CommandExecutor {
             }
             default -> sender.sendMessage(Component.text("Unknown subcommand! Use /" + label + " for help.", NamedTextColor.RED));
         }
-
         return true;
     }
 
