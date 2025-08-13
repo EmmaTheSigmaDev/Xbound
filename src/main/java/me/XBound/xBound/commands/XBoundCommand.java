@@ -41,12 +41,8 @@ public class XBoundCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-
-        if (!sender.hasPermission("xbound.reload")) {
-            sender.sendMessage(Component.text("You do not have permission to use this command.").color(NamedTextColor.RED));
-            return true;
-        }
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
+                             @NotNull String label, @NotNull String @NotNull [] args) {
 
         if (args.length == 0) {
             sendHelp(sender, label);
