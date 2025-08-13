@@ -77,6 +77,7 @@ public final class XBound extends JavaPlugin implements Listener {
     private final Map<UUID, Component> prefixes = new HashMap<>();
     private final Map<UUID, Component> suffixes = new HashMap<>();
     private static XBound instance;
+    private File rulesFile;
 
     @Override
     public void onEnable() {
