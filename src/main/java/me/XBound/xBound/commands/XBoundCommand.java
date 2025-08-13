@@ -73,14 +73,9 @@ public class XBoundCommand implements CommandExecutor {
             case "reload":
                 plugin.reloadConfig();
                 plugin.reloadRulesFile();
-                plugin.reloadDataFile(); // Reloads your saved player/data file
-                sender.sendMessage(Component.text("All plugin files reloaded!").color(NamedTextColor.GREEN));
-                break;
-
-            default:
-                sender.sendMessage(Component.text("Unknown subcommand. Use /" + label + " for help.").color(NamedTextColor.RED));
-                break;
-        }
+                plugin.reloadDataFile();
+                sender.sendMessage(Component.text("All plugin files reloaded!", NamedTextColor.GREEN));
+            }
 
             // ================= Discord Command =================
             case "discord" -> {
