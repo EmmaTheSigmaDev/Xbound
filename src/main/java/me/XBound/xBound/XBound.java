@@ -130,6 +130,10 @@ public final class XBound extends JavaPlugin implements Listener {
         }
     }
 
+    public static XBound getInstance() {
+        return instance;
+    }
+
     private void loadConfig() {
         FileConfiguration cfg = getConfig();
         baseBorderSize = cfg.getInt("base-border-size", 50);
