@@ -156,6 +156,20 @@ public final class XBound extends JavaPlugin implements Listener {
         return instance;
     }
 
+    public void restartJda() {
+        if (jda != null) {
+            jda.shutdown();
+        }
+        try {
+            jda = JDABuilder.createDefault(getConfig().getString("discord.bot-token"))
+                    .addEventListeners(new DiscordToMinecraftListener())
+                    .build();
+        } catch (Exception e) {
+            getLogger().severe("Failed to restart Discord bot: " + e.getMessage());
+        }
+    }
+
+
     private void loadConfig() {
         FileConfiguration cfg = getConfig();
         baseBorderSize = cfg.getInt("base-border-size", 50);
