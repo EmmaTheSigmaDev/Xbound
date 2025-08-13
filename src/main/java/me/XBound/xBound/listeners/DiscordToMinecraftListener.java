@@ -31,6 +31,14 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 
 public class DiscordToMinecraftListener extends ListenerAdapter {
+
+    private final String channelId;
+
+    public DiscordToMinecraftListener() {
+        FileConfiguration config = XBound.getInstance().getConfig();
+        this.channelId = config.getString("discord.channel-id", "");
+    }
+
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
