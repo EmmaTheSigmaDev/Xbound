@@ -134,9 +134,6 @@ public final class XBound extends JavaPlugin implements Listener {
         if (config.getBoolean("events.server-start", true)) {
             sendToDiscord(config.getString("messages.server-start"));
         }
-        jda = JDABuilder.createDefault(config.getString("discord.bot-token"))
-                .addEventListeners(new DiscordToMinecraftListener())
-                .build();
     }
 
     @Override
