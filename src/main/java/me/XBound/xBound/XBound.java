@@ -530,4 +530,23 @@ public final class XBound extends JavaPlugin implements Listener {
                 .replace("{player}", event.getPlayer().getName())
                 .replace("{reason}", reason));
     }
+
+    // Reloads rules.yml from disk
+    public void reloadRulesFile() {
+        if (rulesFile == null) {
+            rulesFile = new File(getDataFolder(), "rules.yml");
+        }
+        FileConfiguration rulesConfig = YamlConfiguration.loadConfiguration(rulesFile);
+        getLogger().info("Rules file reloaded.");
+    }
+
+    // Reloads your custom player/data file
+    public void reloadDataFile() {
+        if (dataFile == null) {
+            dataFile = new File(getDataFolder(), "data.yml");
+        }
+        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+        getLogger().info("Data file reloaded.");
+    }
+
 }
