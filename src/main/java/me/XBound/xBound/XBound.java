@@ -307,8 +307,8 @@ public final class XBound extends JavaPlugin implements Listener {
             updateBorder();
         }
     }
-    
-    private void updatePlayerName(Player player) {
+
+    public void updatePlayerName(Player player) {
         Component name = Component.empty();
         if (prefixes.containsKey(player.getUniqueId())) {
             name = name.append(prefixes.get(player.getUniqueId())).append(Component.text(" "));
