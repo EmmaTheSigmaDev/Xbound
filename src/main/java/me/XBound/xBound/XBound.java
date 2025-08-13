@@ -25,6 +25,9 @@
 package me.XBound.xBound;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import me.XBound.xBound.listeners.DiscordToMinecraftListener;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -109,6 +112,9 @@ public final class XBound extends JavaPlugin implements Listener {
         if (config.getBoolean("events.server-start", true)) {
             sendToDiscord(config.getString("messages.server-start"));
         }
+        JDA jda = JDABuilder.createDefault(config.getString("discord.bot-token"))
+                .addEventListeners(new DiscordToMinecraftListener())
+                .build();
     }
 
     @Override
