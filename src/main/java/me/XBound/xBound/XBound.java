@@ -107,6 +107,23 @@ public final class XBound extends JavaPlugin implements Listener {
         config = getConfig();
         webhookUrl = config.getString("webhook-url");
 
+        // Init JDA once and pass channel ID from config
+        try {
+            String botToken = config.getString("discord.bot-token");
+            String channelId = config.getString("discord.channel-id");
+
+            if (botToken != null && channelId != null) {
+                // pass channel ID
+                JDA jda = JDABuilder.createDefault(botToken)
+                        .addEventListeners(new DiscordToMinecraftListener(channelId)) // pass channel ID
+                        .build();
+            } else {
+                getLogger().warning("Discord bot token or channel ID not set in config.yml. Discord features disabled.");
+            }
+        } catch (Exception e) {
+            getLogger().severe("Failed to start Discord bot: " + e.getMessage());
+        }
+
         // Server start event
         if (config.getBoolean("events.server-start", true)) {
             sendToDiscord(config.getString("messages.server-start"));
