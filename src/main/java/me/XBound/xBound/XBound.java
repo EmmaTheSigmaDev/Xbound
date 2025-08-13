@@ -100,6 +100,9 @@ public final class XBound extends JavaPlugin implements Listener {
         saveDataFile();
         saveDataFile();
         savePrefixSuffix();
+        if (config.getBoolean("events.server-stop", true)) {
+            sendToDiscord(config.getString("messages.server-stop"));
+        }
     }
 
     private void loadConfig() {
