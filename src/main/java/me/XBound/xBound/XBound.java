@@ -104,6 +104,12 @@ public final class XBound extends JavaPlugin implements Listener {
         border.setCenter(centerX, centerZ);
         border.setSize(size);
 
+        reloadRulesFile();
+        reloadDataFile();
+
+        Objects.requireNonNull(getCommand("xbound")).setExecutor(new XBoundCommand(this));
+
+        // Load config values
         config = getConfig();
         webhookUrl = config.getString("webhook-url");
 
