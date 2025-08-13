@@ -1,0 +1,23 @@
+# Base size of the world border in blocks
+base-border-size: 50
+
+# How much XP is needed to increase the border by 1 block
+xp-per-block: 10
+
+# Percentage of XP stolen when a player kills another player
+xp-steal-percent: 50
+
+# Minimum allowed world border size
+min-border-size: 20
+
+# Name of the world this plugin should control
+world: world
+
+# Tablist header and footer
+tablist:
+  header:
+    - "§aWelcome to §cXBound§&a!"
+    - "§7Your XP contributes to the border size."
+  footer:
+    - "§eHave fun!"
+    - "§6Border grows as you gain XP!"

@@ -1,0 +1,26 @@
+name: XBound
+version: '1.0-SNAPSHOT'
+main: me.XBound.xBound.XBound
+api-version: '1.21'
+prefix: XBound
+authors: [ Emma_the_sigma ]
+description: Yes
+website: none
+
+commands:
+  setbordermiddle:
+    description: Set the center of the world border to your location.
+    usage: /setbordermiddle
+    permission: xbound.setbordermiddle
+  xbound:
+    description: Manage your prefix or suffix.
+    usage: /xbound <prefix|suffix> <text>
+    permission: xbound.modify
+
+permissions:
+  xbound.bypassborder:
+    default: op
+  xbound.setbordermiddle:
+    default: op
+  xbound.modify:
+    default: op
