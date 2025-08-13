@@ -26,17 +26,27 @@ package me.XBound.xBound.commands;
 
 import me.XBound.xBound.XBound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.UUID;
 
 public class XBoundCommand implements CommandExecutor {
 
     private final XBound plugin;
+    private final Map<UUID, Component> prefixes;
+    private final Map<UUID, Component> suffixes;
 
-    public XBoundCommand(XBound plugin) {
+    public XBoundCommand(XBound plugin, Map<UUID, Component> prefixes, Map<UUID, Component> suffixes) {
         this.plugin = plugin;
         this.prefixes = prefixes;
         this.suffixes = suffixes;
