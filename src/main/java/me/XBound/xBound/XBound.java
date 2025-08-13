@@ -22,6 +22,8 @@
  * SOFTWARE.
  */
 
+
+
 package me.XBound.xBound;
 
 import net.kyori.adventure.text.Component;
