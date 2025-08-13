@@ -38,6 +38,8 @@ public class XBoundCommand implements CommandExecutor {
 
     public XBoundCommand(XBound plugin) {
         this.plugin = plugin;
+        this.prefixes = prefixes;
+        this.suffixes = suffixes;
     }
 
     @Override
