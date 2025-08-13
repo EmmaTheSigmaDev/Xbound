@@ -320,7 +320,7 @@ public final class XBound extends JavaPlugin implements Listener {
         player.playerListName(name);
     }
 
-    private void savePrefixSuffix() {
+    public void savePrefixSuffix() {
         for (UUID uuid : prefixes.keySet()) {
             dataConfig.set("prefixes." + uuid, prefixes.get(uuid).toString());
         }
