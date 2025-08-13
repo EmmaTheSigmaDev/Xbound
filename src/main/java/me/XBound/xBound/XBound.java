@@ -25,6 +25,7 @@
 package me.XBound.xBound;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import me.XBound.xBound.commands.XBoundCommand;
 import me.XBound.xBound.listeners.DiscordToMinecraftListener;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
