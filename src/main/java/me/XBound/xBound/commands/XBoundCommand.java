@@ -168,6 +168,21 @@ public class XBoundCommand implements CommandExecutor {
 
                 player.sendMessage(Component.text("World border center set to your location!", NamedTextColor.GREEN));
             }
+            case "bordercenter" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage(Component.text("Only players can run this command!", NamedTextColor.RED));
+                    return true;
+                }
+                WorldBorder border = player.getWorld().getWorldBorder();
+                Location center = new Location(
+                        player.getWorld(),
+                        border.getCenter().getX(),
+                        player.getWorld().getHighestBlockYAt(
+                                (int) border.getCenter().getX(),
+                                (int) border.getCenter().getZ()
+                        ) + 1,
+                        border.getCenter().getZ()
+                );
 
             default -> sender.sendMessage(Component.text("Unknown subcommand! Use /" + label + " for help.", NamedTextColor.RED));
         }
