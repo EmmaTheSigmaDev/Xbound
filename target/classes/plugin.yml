@@ -5,7 +5,7 @@ api-version: '1.21'
 prefix: XBound
 authors: [ Emma_the_sigma ]
 description: Yes
-website: none
+website: https://github.com/EmmaTheSigmaDev/Xbound
 
 commands:
   setbordermiddle:

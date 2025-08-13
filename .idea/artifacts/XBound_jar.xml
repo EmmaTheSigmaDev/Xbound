@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="XBound:jar">
-    <output-path>$USER_HOME$/Downloads</output-path>
-    <root id="archive" name="XBound.jar">
-      <element id="module-output" name="XBound" />
-    </root>
-  </artifact>
-</component>

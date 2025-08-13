@@ -64,16 +64,12 @@ public final class XBound extends JavaPlugin implements Listener {
     private double xpStealPercent;
     private int minBorderSize;
     private World world;
-
     private final Map<UUID, Integer> storedXp = new HashMap<>();
     private File dataFile;
     private FileConfiguration dataConfig;
-
     private String webhookUrl;
     private FileConfiguration config;
-
     private final HttpClient httpClient = HttpClient.newHttpClient();
-
     private final Map<UUID, Component> prefixes = new HashMap<>();
     private final Map<UUID, Component> suffixes = new HashMap<>();
     private static XBound instance;
