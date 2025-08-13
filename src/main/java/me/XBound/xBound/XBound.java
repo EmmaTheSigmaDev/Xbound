@@ -81,7 +81,7 @@ public final class XBound extends JavaPlugin implements Listener {
 
         getLogger().info("XP Border plugin enabled!");
 
-        loadDataFile();      // <--- now it runs
+        loadDataFile();
         loadPrefixSuffix();  // loads stored prefixes/suffixes
 
         double size = dataConfig.getDouble("border.size", 100); // default size if not saved
