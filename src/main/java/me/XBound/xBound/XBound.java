@@ -91,6 +91,14 @@ public final class XBound extends JavaPlugin implements Listener {
         WorldBorder border = Bukkit.getWorlds().getFirst().getWorldBorder();
         border.setCenter(centerX, centerZ);
         border.setSize(size);
+
+        config = getConfig();
+        webhookUrl = config.getString("webhook-url");
+
+        // Server start event
+        if (config.getBoolean("events.server-start", true)) {
+            sendToDiscord(config.getString("messages.server-start"));
+        }
     }
 
     @Override
