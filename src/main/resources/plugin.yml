@@ -20,7 +20,5 @@ commands:
 permissions:
   xbound.bypassborder:
     default: op
-  xbound.setbordermiddle:
-    default: op
   xbound.modify:
     default: op
