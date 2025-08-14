@@ -117,8 +117,10 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Usage: /" + label + " prefix <player> <text>", NamedTextColor.RED));
                             return true;
                         }
-                        String prefix = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-                        prefixes.put(target.getUniqueId(), Component.text(prefix, NamedTextColor.GOLD));
+                        String rawPrefix = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                        // Convert & codes and hex into colors
+                        Component prefixComp = LegacyComponentSerializer.legacyAmpersand().deserialize(rawPrefix);
+                        prefixes.put(target.getUniqueId(), prefixComp);
                         plugin.savePrefixSuffix();
                         plugin.updatePlayerName(target);
                         sender.sendMessage(Component.text("Prefix set!", NamedTextColor.GREEN));
