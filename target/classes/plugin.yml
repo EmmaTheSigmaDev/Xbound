@@ -8,19 +8,17 @@ description: Yes
 website: https://github.com/EmmaTheSigmaDev/Xbound
 
 commands:
-  setbordermiddle:
-    description: Set the center of the world border to your location.
-    usage: /setbordermiddle
-    permission: xbound.setbordermiddle
   xbound:
     description: Manage your prefix or suffix.
     usage: /xbound <prefix|suffix> <text>
     permission: xbound.modify
+  discord:
+    description: Sends the Discord link
+  Rules:
+    description: Rules command
 
 permissions:
   xbound.bypassborder:
-    default: op
-  xbound.setbordermiddle:
     default: op
   xbound.modify:
     default: op

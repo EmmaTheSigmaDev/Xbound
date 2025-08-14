@@ -58,5 +58,13 @@ messages:
   server-start: "🖥 Server has started!"
   server-stop: "🛑 Server is stopping!"
 
+# ==================================
+# Discord Bot Settings
+# ==================================
+
+discord:
+  bot-token: "YOUR_BOT_TOKEN"
+  channel-id: "YOUR_CHANNEL_ID"
+
 # Debug mode — when true, extra logging will be shown in console
 debug: false
