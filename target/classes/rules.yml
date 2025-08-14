@@ -1,0 +1,44 @@
+title: "<black>Rules"
+rows: 3
+items:
+  client:
+    slot: 11
+    material: KNOWLEDGE_BOOK
+    name: "<green><bold>CLIENT RULES"
+    lore:
+      - ""
+      - "<green><bold>● <white>No Hacked Clients"
+      - "<green><bold>● <white>No Movement Mods"
+      - "<green><bold>● <white>No Inventory Mods"
+      - "<green><bold>● <white>No Radar"
+      - "<green><bold>● <white>No Freecam"
+      - "<green><bold>● <white>No Auto Place"
+      - "<green><bold>● <white>No Harmful Macros or Scripts"
+
+  general:
+    slot: 13
+    material: KNOWLEDGE_BOOK
+    name: "<gold><bold>GENERAL RULES"
+    lore:
+      - ""
+      - "<gold><bold>● <white>No Abusing Unintentional Bugs"
+      - "<gold><bold>● <white>No Attempted Duplicating"
+      - "<gold><bold>● <white>No Duplicating Items"
+      - "<gold><bold>● <white>No IRL Trading"
+      - "<gold><bold>● <white>No Cross-Server Trading"
+      - "<gold><bold>● <white>No Staff Impersonation"
+      - "<gold><bold>● <white>No Doxxing, Swatting or DDoSing"
+      - "<gold><bold>● <white>No Punishment Evasion"
+
+  chat:
+    slot: 15
+    material: KNOWLEDGE_BOOK
+    name: "<#008AFB><bold>CHAT RULES"
+    lore:
+      - ""
+      - "<#008AFB><bold>● <white>No Spamming & Rioting"
+      - "<#008AFB><bold>● <white>No Harassing & Abusing Others"
+      - "<#008AFB><bold>● <white>No Sharing Others Information"
+      - "<#008AFB><bold>● <white>No Advertisement & Promotion"
+      - "<#008AFB><bold>● <white>No Racism, Discrimination or Hate Speech"
+      - "<#008AFB><bold>● <white>No Death Threats & Suicide Encouragement"
