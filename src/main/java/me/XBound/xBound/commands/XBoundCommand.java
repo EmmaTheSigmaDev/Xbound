@@ -128,8 +128,9 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Usage: /" + label + " suffix <player> <text>", NamedTextColor.RED));
                             return true;
                         }
-                        String suffix = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
-                        suffixes.put(target.getUniqueId(), Component.text(suffix, NamedTextColor.AQUA));
+                        String rawSuffix = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
+                        Component suffixComp = LegacyComponentSerializer.legacyAmpersand().deserialize(rawSuffix);
+                        suffixes.put(target.getUniqueId(), suffixComp);
                         plugin.savePrefixSuffix();
                         plugin.updatePlayerName(target);
                         sender.sendMessage(Component.text("Suffix set!", NamedTextColor.GREEN));
