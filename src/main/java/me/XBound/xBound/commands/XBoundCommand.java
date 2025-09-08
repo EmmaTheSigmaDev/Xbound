@@ -90,7 +90,8 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                             return true;
                         }
-                        int xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0);
+                        //int xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0);
+                        double xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0.0);
                         sender.sendMessage(Component.text(target.getName() + " has " + xp + " XP.", NamedTextColor.GOLD));
                     }
 
@@ -137,7 +138,7 @@ public class XBoundCommand implements CommandExecutor {
                             return true;
                         }
 
-                        plugin.getStoredXp().put(target.getUniqueId(), Math.max(0, amount));
+                        plugin.getStoredXp().put(target.getUniqueId(), Math.max(0.0, amount));
                         plugin.updateBorder();
                         sender.sendMessage(Component.text("Set " + target.getName() + "'s XP to " + amount, NamedTextColor.GREEN));
                         target.sendMessage(Component.text("Your XP was set to " + amount, NamedTextColor.GOLD));
@@ -156,7 +157,8 @@ public class XBoundCommand implements CommandExecutor {
     // ================= Helpers =================
 
     private void sendBalance(CommandSender viewer, Player target) {
-        int xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0);
+        //int xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0);
+        double xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0.0);
         viewer.sendMessage(Component.text(
                 target.getName() + " has contributed " + xp + " XP.",
                 NamedTextColor.GOLD
@@ -164,24 +166,25 @@ public class XBoundCommand implements CommandExecutor {
     }
 
     private void sendLeaderboard(CommandSender sender, int topN) {
-        Map<UUID, Integer> xpMap = plugin.getStoredXp();
+        Map<UUID, Double> xpMap = plugin.getStoredXp(); // <-- use Double now
 
         if (xpMap.isEmpty()) {
             sender.sendMessage(Component.text("No XP contributions yet!", NamedTextColor.RED));
             return;
         }
 
-        List<Map.Entry<UUID, Integer>> sorted = xpMap.entrySet().stream()
-                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+        List<Map.Entry<UUID, Double>> sorted = xpMap.entrySet().stream()
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue())) // sort using Double.compare
                 .limit(topN)
                 .toList();
 
         sender.sendMessage(Component.text("=== XP Leaderboard (Top " + topN + ") ===", NamedTextColor.YELLOW));
         int rank = 1;
-        for (Map.Entry<UUID, Integer> entry : sorted) {
+        for (Map.Entry<UUID, Double> entry : sorted) {
             String name = Optional.ofNullable(Bukkit.getOfflinePlayer(entry.getKey()).getName())
                     .orElse("Unknown");
-            sender.sendMessage(Component.text(rank + ". " + name + " — " + entry.getValue() + " XP", NamedTextColor.AQUA));
+            // format the XP to 1 decimal place
+            sender.sendMessage(Component.text(rank + ". " + name + " — " + String.format("%.1f", entry.getValue()) + " XP", NamedTextColor.AQUA));
             rank++;
         }
     }
