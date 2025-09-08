@@ -4,7 +4,7 @@ main: me.XBound.xBound.XBound
 api-version: '1.21'
 prefix: XBound
 authors: [ Emma_the_sigma ]
-description: Yes
+description: "FUn fact: it took me 2 week to make this plugin mostly cus of my other projects(including: girlsdupe and girlsbox)"
 website: https://github.com/EmmaTheSigmaDev/Xbound
 
 commands:
