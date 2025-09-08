@@ -21,10 +21,33 @@ border:
   xp-per-block: 50
   global-scaling: true
 
+tablist:
+  enabled: true
+  header:
+    - "<green>Welcome to XBound!"
+    - "<yellow>XP Border Active"
+  footer:
+    - "<gray>Type /xbound for help"
+  show-xp: true
+
 xp:
   auto-save: true
   persist-on-death: false
   manual-deposit: false
+  default-block: 0.1
+  ores:
+    COAL_ORE: 0.5
+    IRON_ORE: 1
+    COPPER_ORE: 1
+    GOLD_ORE: 1
+    REDSTONE_ORE: 1.5
+    LAPIS_ORE: 1.0
+    DIAMOND_ORE: 2.0
+    EMERALD_ORE: 7.0
+  multipliers:
+    global: 1.0
+    per-player:
+      Emma_the_sigma: 2.0
 
 settings:
   player:

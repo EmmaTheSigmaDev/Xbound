@@ -2,10 +2,13 @@ package me.XBound.xBound.listeners;
 
 import me.XBound.xBound.XBound;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.entity.Player;
+
+import java.util.Objects;
 
 public class MiningXpListener implements Listener {
 
@@ -18,23 +21,36 @@ public class MiningXpListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
-        Material type = event.getBlock().getType();
+        Block block = event.getBlock();
+        Material type = block.getType();
 
-        // Base XP for every block
-        double xp = 0.1;
+        // Default XP per block
+        double xp = plugin.getConfig().getDouble("xp.default-block", 0.1);
 
-        // Extra XP for ores
-        xp += switch (type) {
-            case COAL_ORE,DEEPSLATE_COAL_ORE -> 0.5;
-            case IRON_ORE, DEEPSLATE_IRON_ORE -> 1;
-            case GOLD_ORE, DEEPSLATE_GOLD_ORE -> 3;
-            case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE -> 10;
-            case EMERALD_ORE, DEEPSLATE_EMERALD_ORE -> 15;
-            case LAPIS_ORE, DEEPSLATE_LAPIS_ORE -> 0.8;
-            case REDSTONE_ORE, DEEPSLATE_REDSTONE_ORE -> 0.25;
-            default -> 0.0;
-        };
+        // Ore-specific overrides (from config: xp.ores.<MATERIAL>)
+        if (plugin.getConfig().isConfigurationSection("xp.ores")) {
+            String key = type.name();
+            if (Objects.requireNonNull(plugin.getConfig().getConfigurationSection("xp.ores")).contains(key)) {
+                xp = plugin.getConfig().getDouble("xp.ores." + key, xp);
+            }
+        }
 
-        plugin.modifyStoredXp(player.getUniqueId(), xp);
+        // Global multiplier
+        double globalMult = plugin.getConfig().getDouble("xp.multipliers.global", 1.0);
+        xp *= globalMult;
+
+        // World-specific multiplier
+        String worldName = player.getWorld().getName();
+        if (plugin.getConfig().isConfigurationSection("xp.multipliers.worlds")) {
+            if (plugin.getConfig().getConfigurationSection("xp.multipliers.worlds").contains(worldName)) {
+                double worldMult = plugin.getConfig().getDouble("xp.multipliers.worlds." + worldName, 1.0);
+                xp *= worldMult;
+            }
+        }
+
+        // ✅ Add XP via helper
+        if (xp > 0) {
+            plugin.modifyStoredXp(player.getUniqueId(), xp);
+        }
     }
 }

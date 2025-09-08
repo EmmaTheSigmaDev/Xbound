@@ -12,7 +12,7 @@ available-langs:
 
 discord:
   link: "https://discord.gg/example"
-  message: "Join our Discord here!"
+  message: "Join our Discord! (click here)"
   hover: "Click to open the Discord"
 
 border:

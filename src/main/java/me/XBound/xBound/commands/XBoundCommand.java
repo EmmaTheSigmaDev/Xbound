@@ -76,6 +76,7 @@ public class XBoundCommand implements CommandExecutor {
                     sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
                     return true;
                 }
+
                 if (args.length < 2) {
                     sender.sendMessage(Component.text("Usage: /xbound xp <check|give|set> [player] [amount]", NamedTextColor.RED));
                     return true;
@@ -104,6 +105,7 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                             return true;
                         }
+
                         double amount;
                         try {
                             amount = Double.parseDouble(args[3]);
@@ -111,7 +113,8 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Amount must be a number!", NamedTextColor.RED));
                             return true;
                         }
-                        plugin.modifyStoredXp(target.getUniqueId(), amount);
+
+                        plugin.modifyStoredXp(target.getUniqueId(), amount); // ✅ use helper
                         sender.sendMessage(Component.text("Added " + String.format("%.1f", amount) + " XP to " + target.getName(), NamedTextColor.GREEN));
                         target.sendMessage(Component.text("You received " + String.format("%.1f", amount) + " XP!", NamedTextColor.GOLD));
                     }
@@ -126,6 +129,7 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                             return true;
                         }
+
                         double amount;
                         try {
                             amount = Double.parseDouble(args[3]);
@@ -133,8 +137,8 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Amount must be a number!", NamedTextColor.RED));
                             return true;
                         }
-                        plugin.getStoredXp().put(target.getUniqueId(), Math.max(0.0, amount));
-                        plugin.updateBorder();
+
+                        plugin.setStoredXp(target.getUniqueId(), amount); // ✅ use helper
                         sender.sendMessage(Component.text("Set " + target.getName() + "'s XP to " + String.format("%.1f", amount), NamedTextColor.GREEN));
                         target.sendMessage(Component.text("Your XP was set to " + String.format("%.1f", amount), NamedTextColor.GOLD));
                     }

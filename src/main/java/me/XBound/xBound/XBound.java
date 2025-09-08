@@ -106,6 +106,11 @@ public final class XBound extends JavaPlugin {
         getLogger().info("XBound disabled.");
     }
 
+    public void setStoredXp(UUID uuid, double amount) {
+        storedXp.put(uuid, Math.max(0.0, amount));
+        updateBorder();
+    }
+
     public static XBound getInstance() {
         return instance;
     }
