@@ -24,7 +24,6 @@ public class XBoundCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String @NotNull [] args) {
 
-        // ✅ Alias: /xpbalance acts like /xbound balance
         if (label.equalsIgnoreCase("xpbalance")) {
             if (sender instanceof Player player) {
                 sendBalance(player, player);
@@ -48,7 +47,6 @@ public class XBoundCommand implements CommandExecutor {
                     sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
                     return true;
                 }
-
                 if (args.length == 1) {
                     sendBalance(sender, player);
                 } else {
@@ -61,6 +59,7 @@ public class XBoundCommand implements CommandExecutor {
                 }
             }
 
+            // ================= Leaderboard =================
             case "leaderboard" -> {
                 int topN = 10;
                 if (args.length >= 2) {
@@ -70,12 +69,13 @@ public class XBoundCommand implements CommandExecutor {
                 }
                 sendLeaderboard(sender, topN);
             }
+
+            // ================= XP Management =================
             case "xp" -> {
                 if (!(sender instanceof Player)) {
                     sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
                     return true;
                 }
-
                 if (args.length < 2) {
                     sender.sendMessage(Component.text("Usage: /xbound xp <check|give|set> [player] [amount]", NamedTextColor.RED));
                     return true;
@@ -90,9 +90,8 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                             return true;
                         }
-                        //int xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0);
                         double xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0.0);
-                        sender.sendMessage(Component.text(target.getName() + " has " + xp + " XP.", NamedTextColor.GOLD));
+                        sender.sendMessage(Component.text(target.getName() + " has " + String.format("%.1f", xp) + " XP.", NamedTextColor.GOLD));
                     }
 
                     case "give", "add" -> {
@@ -105,18 +104,16 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                             return true;
                         }
-
-                        int amount;
+                        double amount;
                         try {
-                            amount = Integer.parseInt(args[3]);
+                            amount = Double.parseDouble(args[3]);
                         } catch (NumberFormatException e) {
                             sender.sendMessage(Component.text("Amount must be a number!", NamedTextColor.RED));
                             return true;
                         }
-
                         plugin.modifyStoredXp(target.getUniqueId(), amount);
-                        sender.sendMessage(Component.text("Added " + amount + " XP to " + target.getName(), NamedTextColor.GREEN));
-                        target.sendMessage(Component.text("You received " + amount + " XP!", NamedTextColor.GOLD));
+                        sender.sendMessage(Component.text("Added " + String.format("%.1f", amount) + " XP to " + target.getName(), NamedTextColor.GREEN));
+                        target.sendMessage(Component.text("You received " + String.format("%.1f", amount) + " XP!", NamedTextColor.GOLD));
                     }
 
                     case "set" -> {
@@ -129,44 +126,41 @@ public class XBoundCommand implements CommandExecutor {
                             sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                             return true;
                         }
-
-                        int amount;
+                        double amount;
                         try {
-                            amount = Integer.parseInt(args[3]);
+                            amount = Double.parseDouble(args[3]);
                         } catch (NumberFormatException e) {
                             sender.sendMessage(Component.text("Amount must be a number!", NamedTextColor.RED));
                             return true;
                         }
-
                         plugin.getStoredXp().put(target.getUniqueId(), Math.max(0.0, amount));
                         plugin.updateBorder();
-                        sender.sendMessage(Component.text("Set " + target.getName() + "'s XP to " + amount, NamedTextColor.GREEN));
-                        target.sendMessage(Component.text("Your XP was set to " + amount, NamedTextColor.GOLD));
+                        sender.sendMessage(Component.text("Set " + target.getName() + "'s XP to " + String.format("%.1f", amount), NamedTextColor.GREEN));
+                        target.sendMessage(Component.text("Your XP was set to " + String.format("%.1f", amount), NamedTextColor.GOLD));
                     }
 
                     default -> sender.sendMessage(Component.text("Unknown action! Use check, give, or set.", NamedTextColor.RED));
                 }
             }
 
-            // keep all your old subcommands (reload, discord, prefix, suffix, bordercenter etc.)
             default -> sender.sendMessage(Component.text("Unknown subcommand! Use /" + label + " for help.", NamedTextColor.RED));
         }
+
         return true;
     }
 
     // ================= Helpers =================
 
     private void sendBalance(CommandSender viewer, Player target) {
-        //int xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0);
         double xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0.0);
         viewer.sendMessage(Component.text(
-                target.getName() + " has contributed " + xp + " XP.",
+                target.getName() + " has contributed " + String.format("%.1f", xp) + " XP.",
                 NamedTextColor.GOLD
         ));
     }
 
     private void sendLeaderboard(CommandSender sender, int topN) {
-        Map<UUID, Double> xpMap = plugin.getStoredXp(); // <-- use Double now
+        Map<UUID, Double> xpMap = plugin.getStoredXp();
 
         if (xpMap.isEmpty()) {
             sender.sendMessage(Component.text("No XP contributions yet!", NamedTextColor.RED));
@@ -174,7 +168,7 @@ public class XBoundCommand implements CommandExecutor {
         }
 
         List<Map.Entry<UUID, Double>> sorted = xpMap.entrySet().stream()
-                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue())) // sort using Double.compare
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
                 .limit(topN)
                 .toList();
 
@@ -183,7 +177,6 @@ public class XBoundCommand implements CommandExecutor {
         for (Map.Entry<UUID, Double> entry : sorted) {
             String name = Optional.ofNullable(Bukkit.getOfflinePlayer(entry.getKey()).getName())
                     .orElse("Unknown");
-            // format the XP to 1 decimal place
             sender.sendMessage(Component.text(rank + ". " + name + " — " + String.format("%.1f", entry.getValue()) + " XP", NamedTextColor.AQUA));
             rank++;
         }
@@ -199,6 +192,5 @@ public class XBoundCommand implements CommandExecutor {
                 .append(Component.text(" - Show top XP contributors", NamedTextColor.DARK_GRAY)));
         sender.sendMessage(Component.text("/xpbalance", NamedTextColor.GRAY)
                 .append(Component.text(" - Quick balance shortcut", NamedTextColor.DARK_GRAY)));
-        // … keep your existing help lines here
     }
 }

@@ -23,7 +23,7 @@ public class DiscordCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         String link = plugin.getConfig().getString("discord.link", "https://discord.gg/example");
-        String message = plugin.getConfig().getString("discord.message", "<aqua>Join our Discord!");
+        String message = plugin.getConfig().getString("discord.message", "<aqua>Join our Discord! (click here)");
         String hover = plugin.getConfig().getString("discord.hover", "<yellow>Click to open the Discord");
 
         if (!(sender instanceof Player player)) {

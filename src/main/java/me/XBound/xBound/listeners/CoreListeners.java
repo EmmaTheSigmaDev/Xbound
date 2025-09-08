@@ -3,10 +3,10 @@ package me.XBound.xBound.listeners;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import me.XBound.xBound.XBound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerExpChangeEvent;
@@ -42,20 +42,40 @@ public class CoreListeners implements Listener {
     }
 
     @EventHandler
-    public void onPlayerKill(EntityDeathEvent event) {
-        if (event.getEntity() instanceof Player victim && victim.getKiller() != null) {
-            Player killer = victim.getKiller();
-            UUID vId = victim.getUniqueId();
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player victim = event.getEntity();
+        UUID vId = victim.getUniqueId();
+
+        double victimXP = plugin.getStoredXp().getOrDefault(vId, 0.0);
+
+        Player killer = victim.getKiller();
+        if (killer != null && killer != victim) {
+            // PvP kill → steal a portion
             UUID kId = killer.getUniqueId();
-
-            int victimXP = plugin.getDataConfig().getInt("players." + vId.toString(), 0);
-            // prefer stored map if present
-            victimXP = Math.max(victimXP, plugin.getStoredXpMap().getOrDefault(vId, 0));
-
-            int stolenXP = (int) (victimXP * plugin.getConfig().getDouble("xp-steal-percent", 50) / 100.0);
+            double stealPercent = plugin.getConfig().getDouble("xp-steal-percent", 50);
+            double stolenXP = victimXP * stealPercent / 100.0;
 
             plugin.modifyStoredXp(vId, -stolenXP);
             plugin.modifyStoredXp(kId, stolenXP);
+
+            victim.sendMessage(Component.text(
+                    "You lost " + String.format("%.1f", stolenXP) + " XP to " + killer.getName(),
+                    NamedTextColor.RED
+            ));
+            killer.sendMessage(Component.text(
+                    "You gained " + String.format("%.1f", stolenXP) + " XP from " + victim.getName(),
+                    NamedTextColor.GREEN
+            ));
+        } else {
+            // Suicide or non-PvP death → lose a fixed percent
+            double deathLossPercent = plugin.getConfig().getDouble("xp-death-percent", 25);
+            double lostXP = victimXP * deathLossPercent / 100.0;
+            plugin.modifyStoredXp(vId, -lostXP);
+
+            victim.sendMessage(Component.text(
+                    "You lost " + String.format("%.1f", lostXP) + " XP due to death.",
+                    NamedTextColor.RED
+            ));
         }
     }
 
@@ -87,20 +107,6 @@ public class CoreListeners implements Listener {
                     .replace("{player}", event.getPlayer().getName())
                     .replace("{message}", message));
         }
-    }
-
-    @EventHandler
-    public void onDeath(PlayerDeathEvent event) {
-        if (!plugin.getConfig().getBoolean("events.death", true)) return;
-
-        Component deathComponent = event.deathMessage();
-        String deathMsg = (deathComponent != null)
-                ? PlainTextComponentSerializer.plainText().serialize(deathComponent)
-                : "died";
-
-        plugin.sendToDiscord(Objects.requireNonNull(plugin.getConfig().getString("messages.death", "{player} {message}"))
-                .replace("{player}", event.getEntity().getName())
-                .replace("{message}", deathMsg));
     }
 
     @EventHandler

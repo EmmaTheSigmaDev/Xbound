@@ -3,7 +3,7 @@ version: '1.0-SNAPSHOT'
 main: me.XBound.xBound.XBound
 api-version: '1.21'
 prefix: XBound
-authors: [ Emma_the_sigma ]
+authors: [ Emma_the_sigma, BetterCore ]
 description: "FUn fact: it took me 2 week to make this plugin mostly cus of my other projects(including: girlsdupe and girlsbox)"
 website: https://github.com/EmmaTheSigmaDev/Xbound
 softdepend: [Luckperms]
