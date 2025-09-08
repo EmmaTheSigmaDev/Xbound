@@ -1,70 +1,77 @@
-# ==================================
-# World Border XP Growth Settings
-# ==================================
+# =========================
+#  XBound Configuration
+# =========================
 
-# Base size of the world border in blocks
-base-border-size: 50
+default-lang: en
 
-# How much XP is needed to increase the border by 1 block
-xp-per-block: 10
-
-# Percentage of XP stolen when a player kills another player
-xp-steal-percent: 50
-
-# Minimum allowed world border size
-min-border-size: 20
-
-# Name of the world this plugin should control
-world: world
-
-# Tablist header and footer
-tablist:
-  header:
-    - "§aWelcome to §cXBound§a!"
-    - "§7Your XP contributes to the border size."
-  footer:
-    - "§eHave fun!"
-    - "§6Border grows as you gain XP!"
-
-# ==================================
-# Discord Event Feed Settings
-# ==================================
-
-# Discord webhook URL where messages will be sent
-webhook-url: "https://discord.com/api/webhooks/XXXX/YYYY"
-
-# Toggle which events are sent to Discord
-events:
-  join: true
-  leave: true
-  chat: true
-  command: true
-  death: true
-  advancement: true
-  kick: true
-  server-start: true
-  server-stop: true
-
-# Message formats
-# Placeholders: {player}, {message}, {reason}, {advancement}
-messages:
-  join: "**{player}** joined the game."
-  leave: "**{player}** left the game."
-  chat: "{player}: {message}"
-  command: "{player} ran command: {message}"
-  death: "☠ {message}"
-  advancement: "🏆 {player} has made the advancement **{advancement}**"
-  kick: "🚪 {player} was kicked for: {reason}"
-  server-start: "🖥 Server has started!"
-  server-stop: "🛑 Server is stopping!"
-
-# ==================================
-# Discord Bot Settings
-# ==================================
+available-langs:
+  - en
+  - de
+  - fr
+  - es
 
 discord:
-  bot-token: "YOUR_BOT_TOKEN"
-  channel-id: "YOUR_CHANNEL_ID"
+  link: "https://discord.gg/example"
+  message: "Join our Discord here!"
+  hover: "Click to open the Discord"
 
-# Debug mode — when true, extra logging will be shown in console
-debug: false
+border:
+  min-size: 100
+  max-size: 10000
+  xp-per-block: 50
+  global-scaling: true
+
+xp:
+  auto-save: true
+  persist-on-death: false
+  manual-deposit: false
+
+settings:
+  player:
+    title: "<green>Player Settings"
+    rows: 1
+    items:
+      language:
+        slot: 0
+        material: BOOK
+        name: "<yellow>Change Language"
+        lore:
+          - "<gray>Cycle through available languages"
+      prefix:
+        slot: 1
+        material: NAME_TAG
+        name: "<green>Prefix/Suffix Toggle"
+        lore:
+          - "<gray>Turn chat prefixes/suffixes on or off"
+      stats:
+        slot: 2
+        material: EXPERIENCE_BOTTLE
+        name: "<gold>Show XP Stats"
+        lore:
+          - "<gray>View your XP contributions"
+  admin:
+    title: "<red>Admin Settings"
+    rows: 1
+    items:
+      language:
+        slot: 0
+        material: BOOK
+        name: "<yellow>Change Language"
+        lore:
+          - "<gray>Cycle through available languages"
+      border:
+        slot: 1
+        material: BARRIER
+        name: "<red>Border Settings"
+        lore:
+          - "<gray>Adjust world border options"
+      xp:
+        slot: 2
+        material: EXPERIENCE_BOTTLE
+        name: "<green>XP Settings"
+        lore:
+          - "<gray>Manage XP contribution settings"
+
+leaderboard:
+  default-size: 10
+  max-size: 50

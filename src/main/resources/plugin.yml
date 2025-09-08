@@ -18,10 +18,6 @@ commands:
   rules:
     description: Rules command.
     usage: /rules
-  bordercenter:
-    description: Teleports you to the center of the world border.
-    usage: /bordercenter
-    permission: xbound.bordercenter
 
 permissions:
   xbound.bypassborder:

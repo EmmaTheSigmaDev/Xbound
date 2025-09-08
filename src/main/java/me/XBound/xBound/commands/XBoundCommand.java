@@ -1,8 +1,3 @@
-/*
- * MIT License
- * Copyright (c) 2025 EMMA_THE_SIGMA
- */
-
 package me.XBound.xBound.commands;
 
 import me.XBound.xBound.XBound;
@@ -44,7 +39,7 @@ public class XBoundCommand implements CommandExecutor {
             return true;
         }
 
-        String sub = args[0].toLowerCase();
+        String sub = args[0].toLowerCase(Locale.ROOT);
 
         switch (sub) {
             // ================= Stats Commands =================
@@ -77,7 +72,6 @@ public class XBoundCommand implements CommandExecutor {
             }
 
             // keep all your old subcommands (reload, discord, prefix, suffix, bordercenter etc.)
-            // ...
             default -> sender.sendMessage(Component.text("Unknown subcommand! Use /" + label + " for help.", NamedTextColor.RED));
         }
         return true;
