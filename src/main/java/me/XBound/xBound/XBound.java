@@ -1,52 +1,16 @@
-/*
- * MIT License
- *
- * Copyright (c) 2025 EMMA_THE_SIGMA
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package me.XBound.xBound;
 
-import io.papermc.paper.event.player.AsyncChatEvent;
-import me.XBound.xBound.commands.BorderCenterCommand;
-import me.XBound.xBound.commands.DiscordCommand;
-import me.XBound.xBound.commands.RulesCommand;
-import me.XBound.xBound.commands.XBoundCommand;
-import me.XBound.xBound.listeners.DiscordToMinecraftListener;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -55,123 +19,86 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
-public final class XBound extends JavaPlugin implements Listener {
+public final class XBound extends JavaPlugin {
 
     private int baseBorderSize;
     private int xpPerBlock;
-    private double xpStealPercent;
     private int minBorderSize;
     private World world;
     private final Map<UUID, Integer> storedXp = new HashMap<>();
     private File dataFile;
-    private FileConfiguration dataConfig;
+    private YamlConfiguration dataConfig;
     private String webhookUrl;
     private FileConfiguration config;
     private final HttpClient httpClient = HttpClient.newHttpClient();
-    private final Map<UUID, Component> prefixes = new HashMap<>();
-    private final Map<UUID, Component> suffixes = new HashMap<>();
+    private final Map<UUID, net.kyori.adventure.text.Component> prefixes = new HashMap<>();
+    private final Map<UUID, net.kyori.adventure.text.Component> suffixes = new HashMap<>();
     private static XBound instance;
     private File rulesFile;
-    private JDA jda;
+
+    private static final GsonComponentSerializer GSON = GsonComponentSerializer.gson();
 
     @Override
     public void onEnable() {
+        instance = this;
+
         saveDefaultConfig();
+        config = getConfig();
+
         loadConfig();
         setupDataFile();
-        Bukkit.getPluginManager().registerEvents(this, this);
+        loadDataFile();
+        loadPrefixSuffix();
 
-        // Load stored XP and border info
+        // load stored player xp for currently online players
         for (Player p : Bukkit.getOnlinePlayers()) {
             loadPlayerXp(p.getUniqueId());
         }
+
         restoreBorder();
         startBorderCheckTask();
+
         updateTablist();
 
-        getLogger().info("XP Border plugin enabled!");
+        // register commands
+        Objects.requireNonNull(getCommand("xbound")).setExecutor(new me.XBound.xBound.commands.XBoundCommand(this, prefixes, suffixes));
+        Objects.requireNonNull(getCommand("discord")).setExecutor(new me.XBound.xBound.commands.DiscordCommand(this));
+        Objects.requireNonNull(getCommand("rules")).setExecutor(new me.XBound.xBound.commands.RulesCommand(this));
+        // note: no separate BorderCenterCommand - bordercenter handled as subcommand of /xbound
 
-        loadDataFile();
-        loadPrefixSuffix();  // loads stored prefixes/suffixes
+        // register listeners (some command classes register their own listeners)
+        Bukkit.getPluginManager().registerEvents(new me.XBound.xBound.listeners.CoreListeners(this), this);
 
-        double size = dataConfig.getDouble("border.size", 100); // default size if not saved
-        double centerX = dataConfig.getDouble("border.center-x", 0);
-        double centerZ = dataConfig.getDouble("border.center-z", 0);
+        webhookUrl = config.getString("webhook-url", "");
 
-        WorldBorder border = Bukkit.getWorlds().getFirst().getWorldBorder();
-        border.setCenter(centerX, centerZ);
-        border.setSize(size);
-
-        reloadRulesFile();
-        reloadDataFile();
-
-        Objects.requireNonNull(getCommand("xbound")).setExecutor(new XBoundCommand(this, prefixes, suffixes));
-        Objects.requireNonNull(getCommand("discord")).setExecutor(new DiscordCommand(this));
-        Objects.requireNonNull(getCommand("rules")).setExecutor(new RulesCommand(this));
-        Objects.requireNonNull(getCommand("bordercenter")).setExecutor(new BorderCenterCommand());
-
-        // Load config values
-        config = getConfig();
-        webhookUrl = config.getString("webhook-url");
-
-        // Init JDA once and pass channel ID from config
-        try {
-            String botToken = config.getString("discord.bot-token");
-            String channelId = config.getString("discord.channel-id");
-
-            if (botToken != null && channelId != null) {
-                // pass channel ID
-                JDA jda = JDABuilder.createDefault(botToken)
-                        .addEventListeners(new DiscordToMinecraftListener(channelId)) // pass channel ID
-                        .build();
-            } else {
-                getLogger().warning("Discord bot token or channel ID not set in config.yml. Discord features disabled.");
-            }
-        } catch (Exception e) {
-            getLogger().severe("Failed to start Discord bot: " + e.getMessage());
-        }
-
-        // Server start event
-        if (config.getBoolean("events.server-start", true)) {
-            sendToDiscord(config.getString("messages.server-start"));
-        }
+        getLogger().info("XBound enabled. Instance set. Global border operating on stored XP.");
     }
 
     @Override
     public void onDisable() {
+        // persist player xp
         Bukkit.getOnlinePlayers().forEach(p -> savePlayerXp(p.getUniqueId()));
+
         saveBorder();
         saveDataFile();
-        saveDataFile();
+
         savePrefixSuffix();
+
         if (config.getBoolean("events.server-stop", true)) {
-            sendToDiscord(config.getString("messages.server-stop"));
+            sendToDiscord(config.getString("messages.server-stop", "Server stopping"));
         }
-        if (jda != null) {
-            jda.shutdown();
-        }
+
+        getLogger().info("XBound disabled.");
     }
 
     public static XBound getInstance() {
         return instance;
     }
 
-    public void restartJda() {
-        if (jda != null) {
-            jda.shutdown();
-        }
-        try {
-            jda = JDABuilder.createDefault(getConfig().getString("discord.bot-token"))
-                    .addEventListeners(new DiscordToMinecraftListener(webhookUrl))
-                    .build();
-        } catch (Exception e) {
-            getLogger().severe("Failed to restart Discord bot: " + e.getMessage());
-        }
-    }
-
-    public FileConfiguration getDataConfig() {
+    public YamlConfiguration getDataConfig() {
         return dataConfig;
     }
 
@@ -179,13 +106,17 @@ public final class XBound extends JavaPlugin implements Listener {
         FileConfiguration cfg = getConfig();
         baseBorderSize = cfg.getInt("base-border-size", 50);
         xpPerBlock = cfg.getInt("xp-per-block", 10);
-        xpStealPercent = cfg.getDouble("xp-steal-percent", 50) / 100.0;
+        double xpStealPercent = cfg.getDouble("xp-steal-percent", 50) / 100.0;
         minBorderSize = cfg.getInt("min-border-size", 20);
-        world = Bukkit.getWorld(cfg.getString("world", "world"));
-        if (world == null) {
-            getLogger().severe("Configured world not found! Defaulting to first world.");
-            world = Bukkit.getWorlds().getFirst();
+
+        String worldName = cfg.getString("world", null);
+        if (worldName != null) {
+            world = Bukkit.getWorld(worldName);
+            if (world == null) {
+                getLogger().severe("Configured world '" + worldName + "' not found! Defaulting to first world.");
+            }
         }
+        if (world == null) world = Bukkit.getWorlds().getFirst();
     }
 
     private void setupDataFile() {
@@ -197,17 +128,22 @@ public final class XBound extends JavaPlugin implements Listener {
         dataFile = new File(dataFolder, "data.yml");
         if (!dataFile.exists()) {
             try {
-                if (!dataFile.createNewFile()) {
-                    getLogger().severe("Failed to create data.yml!");
+                saveResource("data.yml", false);
+            } catch (Exception e) {
+                try {
+                    if (!dataFile.createNewFile()) {
+                        getLogger().severe("Failed to create data.yml!");
+                    }
+                } catch (IOException ex) {
+                    getLogger().log(Level.SEVERE, "Error while creating data.yml", ex);
                 }
-            } catch (IOException e) {
-                getLogger().log(Level.SEVERE, "Error while creating data.yml", e);
             }
         }
-        dataConfig = YamlConfiguration.loadConfiguration(dataFile); // <— actually load it
+        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
     }
 
     public void saveDataFile() {
+        if (dataConfig == null || dataFile == null) return;
         try {
             dataConfig.save(dataFile);
         } catch (IOException e) {
@@ -215,37 +151,30 @@ public final class XBound extends JavaPlugin implements Listener {
         }
     }
 
-    private void loadPlayerXp(UUID uuid) {
-        int xp = dataConfig.getInt("players." + uuid, 0);
-        storedXp.put(uuid, xp);
-    }
-
-    private void savePlayerXp(UUID uuid) {
-        dataConfig.set("players." + uuid, storedXp.getOrDefault(uuid, 0));
-    }
-
-    private void updateBorder() {
+    /**
+     * Recomputes global border size from the combined stored XP of all players.
+     */
+    public synchronized void updateBorder() {
         int totalXP = storedXp.values().stream().mapToInt(Integer::intValue).sum();
-        int newSize = Math.max(minBorderSize, baseBorderSize + (totalXP / xpPerBlock));
-        world.getWorldBorder().setSize(newSize);
+        double extra = (double) totalXP / Math.max(1, xpPerBlock);
+        double newSize = Math.max(minBorderSize, baseBorderSize + Math.floor(extra));
+        WorldBorder border = world.getWorldBorder();
+        border.setSize(newSize);
         saveBorder();
     }
 
-    private void saveBorder() {
-        dataConfig.set("border.size", world.getWorldBorder().getSize());
-        dataConfig.set("border.center-x", world.getWorldBorder().getCenter().getX());
-        dataConfig.set("border.center-z", world.getWorldBorder().getCenter().getZ());
-    }
-
     private void restoreBorder() {
+        if (dataConfig == null) return;
         double size = dataConfig.getDouble("border.size", baseBorderSize);
         double centerX = dataConfig.getDouble("border.center-x", world.getSpawnLocation().getX());
         double centerZ = dataConfig.getDouble("border.center-z", world.getSpawnLocation().getZ());
-        world.getWorldBorder().setSize(size);
-        world.getWorldBorder().setCenter(centerX, centerZ);
+        WorldBorder border = world.getWorldBorder();
+        border.setCenter(centerX, centerZ);
+        border.setSize(size);
     }
 
     private void startBorderCheckTask() {
+        // runs every second
         Bukkit.getScheduler().runTaskTimer(this, () -> {
             double centerX = world.getWorldBorder().getCenter().getX();
             double centerZ = world.getWorldBorder().getCenter().getZ();
@@ -259,144 +188,127 @@ public final class XBound extends JavaPlugin implements Listener {
                 double dz = Math.abs(player.getLocation().getZ() - centerZ);
 
                 if (dx > radius || dz > radius) {
-                    player.teleport(world.getHighestBlockAt((int) centerX, (int) centerZ).getLocation().add(0.5, 1, 0.5));
-                    player.sendMessage("§cYou went out of the border! Teleporting you back to the center.");
+                    // Teleport safely to border center (async chunk load then sync teleport)
+                    int bx = (int) Math.floor(centerX);
+                    int bz = (int) Math.floor(centerZ);
+                    CompletableFuture.runAsync(() -> {
+                        // load chunk async via Paper API if available; fallback to sync chunk load
+                        try {
+                            // Paper provides world.getChunkAtAsync; use reflection-like safe call
+                            world.getChunkAtAsync(bx, bz).join();
+                        } catch (Throwable ignored) {
+                            // fallback: ensure chunk is loaded sync (less ideal)
+                            world.getChunkAt(bx, bz);
+                        }
+                    }).thenRun(() -> {
+                        Bukkit.getScheduler().runTask(this, () -> {
+                            Location safe = findSafeLocationNear(world, bx, bz);
+                            if (safe == null) {
+                                // fallback: highest block
+                                safe = world.getHighestBlockAt(bx, bz).getLocation().add(0.5, 1, 0.5);
+                            }
+                            player.teleport(safe);
+                            player.sendMessage(Component.text("§cYou went out of the border! Teleporting you back to the center."));
+                        });
+                    });
                 }
             }
         }, 20L, 20L);
     }
 
-    private void updateTablist() {
-        String header = String.join("\n", getConfig().getStringList("tablist.header"));
-        String footer = String.join("\n", getConfig().getStringList("tablist.footer"));
+    /**
+     * Finds a safe surface location at (x,z) scanning down from highest -> minHeight.
+     * Returns Location with +0.5 offsets on x/z and y set to the first safe standing position (y+1).
+     */
+    private Location findSafeLocationNear(World world, int x, int z) {
+        int highestY = world.getHighestBlockYAt(x, z);
+        int minY = world.getMinHeight();
+        for (int y = highestY; y >= minY; y--) {
+            org.bukkit.block.Block floor = world.getBlockAt(x, y, z);
+            org.bukkit.block.Block above = world.getBlockAt(x, y + 1, z);
+            org.bukkit.block.Block above2 = world.getBlockAt(x, y + 2, z);
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendPlayerListHeader(net.kyori.adventure.text.Component.text(header));
-            player.sendPlayerListFooter(net.kyori.adventure.text.Component.text(footer));
+            // must be solid to stand on, above blocks must be non-solid and non-liquid
+            boolean floorSolid = floor.getType().isSolid();
+            boolean aboveFree = !above.getType().isSolid() && !above.isLiquid();
+            boolean above2Free = !above2.getType().isSolid() && !above2.isLiquid();
+
+            if (floorSolid && aboveFree && above2Free) {
+                // avoid cactus/magma/lava floor
+                if (floor.getType().name().contains("CACTUS") ||
+                        floor.getType().name().contains("MAGMA") ||
+                        floor.getType().name().contains("LAVA")) {
+                    continue;
+                }
+                return new Location(world, x + 0.5, y + 1, z + 0.5);
+            }
         }
-    }
-
-    @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
-        savePlayerXp(event.getPlayer().getUniqueId());
-        saveBorder();
-        saveDataFile();
-    }
-
-    @EventHandler
-    public void onXpGain(PlayerExpChangeEvent event) {
-        if (event.getAmount() > 0) {
-            UUID id = event.getPlayer().getUniqueId();
-            storedXp.put(id, storedXp.getOrDefault(id, 0) + event.getAmount());
-            updateBorder();
-        }
-    }
-
-    @EventHandler
-    public void onPlayerKill(EntityDeathEvent event) {
-        if (event.getEntity() instanceof Player victim && victim.getKiller() != null) {
-            Player killer = victim.getKiller();
-            UUID vId = victim.getUniqueId();
-            UUID kId = killer.getUniqueId();
-
-            int victimXP = storedXp.getOrDefault(vId, 0);
-            int stolenXP = (int) (victimXP * xpStealPercent);
-
-            storedXp.put(vId, victimXP - stolenXP);
-            storedXp.put(kId, storedXp.getOrDefault(kId, 0) + stolenXP);
-
-            updateBorder();
-        }
-    }
-
-    public void updatePlayerName(Player player) {
-        Component name = Component.empty();
-        if (prefixes.containsKey(player.getUniqueId())) {
-            name = name.append(prefixes.get(player.getUniqueId())).append(Component.text(" "));
-        }
-        name = name.append(Component.text(player.getName(), NamedTextColor.WHITE));
-        if (suffixes.containsKey(player.getUniqueId())) {
-            name = name.append(Component.text(" ")).append(suffixes.get(player.getUniqueId()));
-        }
-        player.playerListName(name);
+        return null;
     }
 
     public void savePrefixSuffix() {
+        if (dataConfig == null) return;
         for (UUID uuid : prefixes.keySet()) {
-            dataConfig.set("prefixes." + uuid, prefixes.get(uuid).toString());
+            dataConfig.set("prefixes." + uuid.toString(), GSON.serialize(prefixes.get(uuid)));
         }
         for (UUID uuid : suffixes.keySet()) {
-            dataConfig.set("suffixes." + uuid, suffixes.get(uuid).toString());
+            dataConfig.set("suffixes." + uuid.toString(), GSON.serialize(suffixes.get(uuid)));
         }
         saveDataFile();
     }
 
     private void loadPrefixSuffix() {
+        if (dataConfig == null) return;
         if (dataConfig.isConfigurationSection("prefixes")) {
             for (String key : Objects.requireNonNull(dataConfig.getConfigurationSection("prefixes")).getKeys(false)) {
-                String prefixText = dataConfig.getString("prefixes." + key);
-                if (prefixText != null) {
-                    prefixes.put(UUID.fromString(key), Component.text(prefixText, NamedTextColor.GOLD));
+                String json = dataConfig.getString("prefixes." + key, null);
+                if (json != null) {
+                    try {
+                        prefixes.put(UUID.fromString(key), GSON.deserialize(json));
+                    } catch (Exception e) {
+                        getLogger().warning("Failed to deserialize prefix for " + key + ": " + e.getMessage());
+                    }
                 }
             }
         }
         if (dataConfig.isConfigurationSection("suffixes")) {
             for (String key : Objects.requireNonNull(dataConfig.getConfigurationSection("suffixes")).getKeys(false)) {
-                String suffixText = dataConfig.getString("suffixes." + key);
-                if (suffixText != null) {
-                    suffixes.put(UUID.fromString(key), Component.text(suffixText, NamedTextColor.AQUA));
+                String json = dataConfig.getString("suffixes." + key, null);
+                if (json != null) {
+                    try {
+                        suffixes.put(UUID.fromString(key), GSON.deserialize(json));
+                    } catch (Exception e) {
+                        getLogger().warning("Failed to deserialize suffix for " + key + ": " + e.getMessage());
+                    }
                 }
             }
         }
     }
 
     private void loadDataFile() {
-        dataFile = new File(getDataFolder(), "data.yml");
+        if (dataFile == null) dataFile = new File(getDataFolder(), "data.yml");
         if (!dataFile.exists()) {
-            File parentFolder = dataFile.getParentFile();
-            if (!parentFolder.exists() && !parentFolder.mkdirs()) {
-                getLogger().severe("Failed to create plugin data folder: " + parentFolder.getAbsolutePath());
-                return;
-            }
             saveResource("data.yml", false);
         }
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
     }
 
-    private double calculateBorderSizeFromXP(double xp) {
-        double baseSize = 50;
-        double scale = 0.5;
-        return baseSize + (xp * scale);
+    /**
+     * Called by listeners when a player should have xp changed in storedXp map.
+     */
+    public void modifyStoredXp(UUID uuid, int delta) {
+        storedXp.put(uuid, Math.max(0, storedXp.getOrDefault(uuid, 0) + delta));
+        updateBorder();
     }
 
-    private void updateBorderForXP(Player player, double xp) {
-        double newSize = calculateBorderSizeFromXP(xp); // however you calculate it
-        WorldBorder border = player.getWorld().getWorldBorder();
-        border.setSize(newSize);
-
-        dataConfig.set("border.size", newSize);
-        saveDataFile();
+    public Map<UUID, Integer> getStoredXpMap() {
+        return Collections.unmodifiableMap(storedXp);
     }
 
-    @EventHandler
-    public void onExpChange(PlayerExpChangeEvent event) {
-        Player player = event.getPlayer();
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            double xp = player.getTotalExperience();
-            updateBorderForXP(player, xp);
-        }, 1L); // delay 1 tick so XP is updated before checking
-    }
-
-    @EventHandler
-    public void onLevelChange(PlayerLevelChangeEvent event) {
-        Player player = event.getPlayer();
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            double xp = player.getTotalExperience();
-            updateBorderForXP(player, xp);
-        }, 1L);
-    }
-
-    private void sendToDiscord(String message) {
+    /**
+     * Sends a message to Discord webhook asynchronously.
+     */
+    public void sendToDiscord(String message) {
         if (webhookUrl == null || webhookUrl.isEmpty()) return;
         if (message == null || message.isEmpty()) return;
 
@@ -408,7 +320,6 @@ public final class XBound extends JavaPlugin implements Listener {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
                 .build();
 
-        // Run async to avoid blocking the server thread
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding())
                 .exceptionally(e -> {
                     getLogger().warning("Failed to send message to Discord: " + e.getMessage());
@@ -416,86 +327,56 @@ public final class XBound extends JavaPlugin implements Listener {
                 });
     }
 
-    @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        loadPlayerXp(event.getPlayer().getUniqueId());
-        updateBorder();
+    public Map<UUID, Component> getPrefixes() {
+        return Collections.unmodifiableMap(prefixes);
+    }
 
-        if (config.getBoolean("events.join", true)) {
-            sendToDiscord(Objects.requireNonNull(config.getString("messages.join")).replace("{player}", event.getPlayer().getName()));
+    public Map<UUID, Component> getSuffixes() {
+        return Collections.unmodifiableMap(suffixes);
+    }
+
+    public void updatePlayerName(org.bukkit.entity.Player player) {
+        // update player list name using Adventure Component
+        Component name = Component.empty();
+        if (prefixes.containsKey(player.getUniqueId())) {
+            name = name.append(prefixes.get(player.getUniqueId())).append(Component.text(" "));
+        }
+        name = name.append(Component.text(player.getName()));
+        if (suffixes.containsKey(player.getUniqueId())) {
+            name = name.append(Component.text(" ")).append(suffixes.get(player.getUniqueId()));
+        }
+        player.playerListName(name);
+    }
+
+    private void updateTablist() {
+        List<String> headerLines = getConfig().getStringList("tablist.header");
+        List<String> footerLines = getConfig().getStringList("tablist.footer");
+        String header = String.join("\n", headerLines);
+        String footer = String.join("\n", footerLines);
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendPlayerListHeader(net.kyori.adventure.text.Component.text(header));
+            player.sendPlayerListFooter(net.kyori.adventure.text.Component.text(footer));
         }
     }
 
-    @EventHandler
-    public void onLeave(PlayerQuitEvent event) {
-        if (config.getBoolean("events.leave", true)) {
-            sendToDiscord(Objects.requireNonNull(config.getString("messages.leave")).replace("{player}", event.getPlayer().getName()));
-        }
+    public Map<UUID, Integer> getStoredXp() {
+        return storedXp;
     }
 
-    @EventHandler
-    public void onChat(AsyncChatEvent event) {
-        if (config.getBoolean("events.chat", true)) {
-            String message = PlainTextComponentSerializer.plainText().serialize(event.message());
-            sendToDiscord(Objects.requireNonNull(config.getString("messages.chat"))
-                    .replace("{player}", event.getPlayer().getName())
-                    .replace("{message}", message));
-        }
+    // make public
+    public void savePlayerXp(UUID uuid) {
+        dataConfig.set("players." + uuid, storedXp.getOrDefault(uuid, 0));
     }
 
-    @EventHandler
-    public void onDeath(PlayerDeathEvent event) {
-        if (!config.getBoolean("events.death", true)) return;
-
-        Component deathComponent = event.deathMessage();
-        String deathMsg = (deathComponent != null)
-                ? PlainTextComponentSerializer.plainText().serialize(deathComponent)
-                : "died";
-
-        sendToDiscord(Objects.requireNonNull(config.getString("messages.death"))
-                .replace("{player}", event.getEntity().getName())
-                .replace("{message}", deathMsg));
+    public void loadPlayerXp(UUID uuid) {
+        int xp = dataConfig.getInt("players." + uuid, 0);
+        storedXp.put(uuid, xp);
     }
 
-    @EventHandler
-    public void onAdvancement(PlayerAdvancementDoneEvent event) {
-        if (config.getBoolean("events.advancement", true)) {
-            String advName = event.getAdvancement().getKey().getKey();
-            if (!advName.contains("recipes/")) { // avoid recipe spam
-                sendToDiscord(Objects.requireNonNull(config.getString("messages.advancement"))
-                        .replace("{player}", event.getPlayer().getName())
-                        .replace("{advancement}", advName.replace("_", " ")));
-            }
-        }
+    public void saveBorder() {
+        dataConfig.set("border.size", world.getWorldBorder().getSize());
+        dataConfig.set("border.center-x", world.getWorldBorder().getCenter().getX());
+        dataConfig.set("border.center-z", world.getWorldBorder().getCenter().getZ());
     }
-
-    @EventHandler
-    public void onKick(PlayerKickEvent event) {
-        if (!config.getBoolean("events.kick", true)) return;
-
-        String reason = PlainTextComponentSerializer.plainText().serialize(event.reason());
-
-        sendToDiscord(Objects.requireNonNull(config.getString("messages.kick"))
-                .replace("{player}", event.getPlayer().getName())
-                .replace("{reason}", reason));
-    }
-
-    // Reloads rules.yml from disk
-    public void reloadRulesFile() {
-        if (rulesFile == null) {
-            rulesFile = new File(getDataFolder(), "rules.yml");
-        }
-        FileConfiguration rulesConfig = YamlConfiguration.loadConfiguration(rulesFile);
-        getLogger().info("Rules file reloaded.");
-    }
-
-    // Reloads your custom player/data file
-    public void reloadDataFile() {
-        if (dataFile == null) {
-            dataFile = new File(getDataFolder(), "data.yml");
-        }
-        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
-        getLogger().info("Data file reloaded.");
-    }
-
 }

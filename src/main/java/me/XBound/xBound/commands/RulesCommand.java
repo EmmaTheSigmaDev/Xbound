@@ -1,27 +1,3 @@
-/*
- * MIT License
- *
- * Copyright (c) 2025 EMMA_THE_SIGMA
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package me.XBound.xBound.commands;
 
 import me.XBound.xBound.XBound;
@@ -33,7 +9,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -47,12 +22,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RulesCommand implements CommandExecutor, Listener {
 
     private final XBound plugin;
-    private FileConfiguration rulesConfig;
+    private YamlConfiguration rulesConfig;
     private static final MiniMessage MM = MiniMessage.miniMessage();
+    private final Map<Player, Component> openTitles = new ConcurrentHashMap<>();
 
     public RulesCommand(XBound plugin) {
         this.plugin = plugin;
@@ -85,8 +63,9 @@ public class RulesCommand implements CommandExecutor, Listener {
     private void openRulesGui(Player player) {
         String titleRaw = rulesConfig.getString("title", "<black>Rules");
         Component title = MM.deserialize(titleRaw);
+        openTitles.put(player, title);
 
-        int rows = rulesConfig.getInt("rows", 3);
+        int rows = Math.max(1, Math.min(6, rulesConfig.getInt("rows", 3)));
         Inventory gui = Bukkit.createInventory(null, rows * 9, title);
 
         ConfigurationSection itemsSection = rulesConfig.getConfigurationSection("items");
@@ -113,7 +92,9 @@ public class RulesCommand implements CommandExecutor, Listener {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         meta.displayName(MM.deserialize(title));
-        meta.lore(loreLines.stream().map(MM::deserialize).toList());
+        if (loreLines != null && !loreLines.isEmpty()) {
+            meta.lore(loreLines.stream().map(MM::deserialize).toList());
+        }
         item.setItemMeta(meta);
         return item;
     }
@@ -121,10 +102,10 @@ public class RulesCommand implements CommandExecutor, Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         HumanEntity clicker = event.getWhoClicked();
-        if (!(clicker instanceof Player)) return;
+        if (!(clicker instanceof Player player)) return;
 
-        String titleRaw = rulesConfig.getString("title", "<black>Rules");
-        if (event.getView().title().equals(MM.deserialize(titleRaw))) {
+        Component expected = openTitles.get(player);
+        if (expected != null && event.getView().title().equals(expected)) {
             event.setCancelled(true);
         }
     }
