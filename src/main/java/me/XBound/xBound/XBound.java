@@ -34,7 +34,6 @@ public final class XBound extends JavaPlugin {
     private int xpPerBlock;
     private int minBorderSize;
     private World world;
-    private final Map<UUID, Integer> storedXp = new HashMap<>();
     private File dataFile;
     private YamlConfiguration dataConfig;
     private String webhookUrl;
@@ -44,6 +43,7 @@ public final class XBound extends JavaPlugin {
     private final Map<UUID, Component> suffixes = new HashMap<>();
     private static XBound instance;
     private MessageManager messageManager;
+    private final Map<UUID, Double> storedXp = new HashMap<>();
 
     private static final GsonComponentSerializer GSON = GsonComponentSerializer.gson();
 
@@ -78,6 +78,7 @@ public final class XBound extends JavaPlugin {
         Objects.requireNonNull(getCommand("discord")).setExecutor(new me.XBound.xBound.commands.DiscordCommand(this));
         Objects.requireNonNull(getCommand("rules")).setExecutor(new me.XBound.xBound.commands.RulesCommand(this));
         Bukkit.getPluginManager().registerEvents(new me.XBound.xBound.listeners.CoreListeners(this), this);
+        Bukkit.getPluginManager().registerEvents(new me.XBound.xBound.listeners.MiningXpListener(this), this);
 
         webhookUrl = config.getString("webhook-url", "");
         getLogger().info("XBound enabled. Instance set. Global border operating on stored XP.");
@@ -166,8 +167,8 @@ public final class XBound extends JavaPlugin {
     }
 
     public synchronized void updateBorder() {
-        int totalXP = storedXp.values().stream().mapToInt(Integer::intValue).sum();
-        double extra = (double) totalXP / Math.max(1, xpPerBlock);
+        double totalXP = storedXp.values().stream().mapToDouble(Double::doubleValue).sum();
+        double extra = totalXP / Math.max(1, xpPerBlock);
         double newSize = Math.max(minBorderSize, baseBorderSize + Math.floor(extra));
         world.getWorldBorder().setSize(newSize);
         saveBorder();
@@ -267,12 +268,12 @@ public final class XBound extends JavaPlugin {
         }
     }
 
-    public void modifyStoredXp(UUID uuid, int delta) {
-        storedXp.put(uuid, Math.max(0, storedXp.getOrDefault(uuid, 0) + delta));
+    public synchronized void modifyStoredXp(UUID uuid, double delta) {
+        storedXp.put(uuid, Math.max(0, storedXp.getOrDefault(uuid, 0.0) + delta));
         updateBorder();
     }
 
-    public Map<UUID, Integer> getStoredXpMap() {
+    public Map<UUID, Double> getStoredXpMap() {
         return Collections.unmodifiableMap(storedXp);
     }
 
@@ -298,16 +299,16 @@ public final class XBound extends JavaPlugin {
         return Collections.unmodifiableMap(suffixes);
     }
 
-    public Map<UUID, Integer> getStoredXp() {
+    public Map<UUID, Double> getStoredXp() {
         return storedXp;
     }
 
     public void savePlayerXp(UUID uuid) {
-        dataConfig.set("players." + uuid, storedXp.getOrDefault(uuid, 0));
+        dataConfig.set("players." + uuid, storedXp.getOrDefault(uuid, 0.0));
     }
 
     public void loadPlayerXp(UUID uuid) {
-        int xp = dataConfig.getInt("players." + uuid, 0);
+        double xp = dataConfig.getDouble("players." + uuid, 0.0);
         storedXp.put(uuid, xp);
     }
 

@@ -4,8 +4,9 @@ main: me.XBound.xBound.XBound
 api-version: '1.21'
 prefix: XBound
 authors: [ Emma_the_sigma ]
-description: Yes
+description: "FUn fact: it took me 2 week to make this plugin mostly cus of my other projects(including: girlsdupe and girlsbox)"
 website: https://github.com/EmmaTheSigmaDev/Xbound
+softdepend: [Luckperms]
 
 commands:
   xbound:
@@ -18,10 +19,6 @@ commands:
   rules:
     description: Rules command.
     usage: /rules
-  bordercenter:
-    description: Teleports you to the center of the world border.
-    usage: /bordercenter
-    permission: xbound.bordercenter
 
 permissions:
   xbound.bypassborder:

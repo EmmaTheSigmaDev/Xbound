@@ -70,6 +70,82 @@ public class XBoundCommand implements CommandExecutor {
                 }
                 sendLeaderboard(sender, topN);
             }
+            case "xp" -> {
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
+                    return true;
+                }
+
+                if (args.length < 2) {
+                    sender.sendMessage(Component.text("Usage: /xbound xp <check|give|set> [player] [amount]", NamedTextColor.RED));
+                    return true;
+                }
+
+                String action = args[1].toLowerCase(Locale.ROOT);
+
+                switch (action) {
+                    case "check" -> {
+                        Player target = (args.length >= 3) ? Bukkit.getPlayer(args[2]) : (Player) sender;
+                        if (target == null) {
+                            sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
+                            return true;
+                        }
+                        int xp = plugin.getStoredXp().getOrDefault(target.getUniqueId(), 0);
+                        sender.sendMessage(Component.text(target.getName() + " has " + xp + " XP.", NamedTextColor.GOLD));
+                    }
+
+                    case "give", "add" -> {
+                        if (args.length < 4) {
+                            sender.sendMessage(Component.text("Usage: /xbound xp give <player> <amount>", NamedTextColor.RED));
+                            return true;
+                        }
+                        Player target = Bukkit.getPlayer(args[2]);
+                        if (target == null) {
+                            sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
+                            return true;
+                        }
+
+                        int amount;
+                        try {
+                            amount = Integer.parseInt(args[3]);
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage(Component.text("Amount must be a number!", NamedTextColor.RED));
+                            return true;
+                        }
+
+                        plugin.modifyStoredXp(target.getUniqueId(), amount);
+                        sender.sendMessage(Component.text("Added " + amount + " XP to " + target.getName(), NamedTextColor.GREEN));
+                        target.sendMessage(Component.text("You received " + amount + " XP!", NamedTextColor.GOLD));
+                    }
+
+                    case "set" -> {
+                        if (args.length < 4) {
+                            sender.sendMessage(Component.text("Usage: /xbound xp set <player> <amount>", NamedTextColor.RED));
+                            return true;
+                        }
+                        Player target = Bukkit.getPlayer(args[2]);
+                        if (target == null) {
+                            sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
+                            return true;
+                        }
+
+                        int amount;
+                        try {
+                            amount = Integer.parseInt(args[3]);
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage(Component.text("Amount must be a number!", NamedTextColor.RED));
+                            return true;
+                        }
+
+                        plugin.getStoredXp().put(target.getUniqueId(), Math.max(0, amount));
+                        plugin.updateBorder();
+                        sender.sendMessage(Component.text("Set " + target.getName() + "'s XP to " + amount, NamedTextColor.GREEN));
+                        target.sendMessage(Component.text("Your XP was set to " + amount, NamedTextColor.GOLD));
+                    }
+
+                    default -> sender.sendMessage(Component.text("Unknown action! Use check, give, or set.", NamedTextColor.RED));
+                }
+            }
 
             // keep all your old subcommands (reload, discord, prefix, suffix, bordercenter etc.)
             default -> sender.sendMessage(Component.text("Unknown subcommand! Use /" + label + " for help.", NamedTextColor.RED));
