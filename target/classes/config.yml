@@ -16,15 +16,38 @@ discord:
   hover: "Click to open the Discord"
 
 border:
-  min-size: 100
+  min-size: 25
   max-size: 10000
   xp-per-block: 50
   global-scaling: true
+
+tablist:
+  enabled: true
+  header:
+    - "<green>Welcome to XBound!"
+    - "<yellow>XP Border Active"
+  footer:
+    - "<gray>Type /xbound for help"
+  show-xp: true
 
 xp:
   auto-save: true
   persist-on-death: false
   manual-deposit: false
+  default-block: 1
+  ores:
+    COAL_ORE: 5.0
+    IRON_ORE: 10.0
+    COPPER_ORE: 10.0
+    GOLD_ORE: 10.0
+    REDSTONE_ORE: 15.0
+    LAPIS_ORE: 10.0
+    DIAMOND_ORE: 20.0
+    EMERALD_ORE: 70.0
+  multipliers:
+    global: 2.0
+    per-player:
+      Emma_the_sigma: 2.0
 
 settings:
   player:

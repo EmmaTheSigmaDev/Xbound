@@ -1,7 +1,7 @@
-package me.XBound.xBound.listeners;
+package me.RealsmileyXD.xBound.listeners;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
-import me.XBound.xBound.XBound;
+import me.RealsmileyXD.xBound.XBound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;

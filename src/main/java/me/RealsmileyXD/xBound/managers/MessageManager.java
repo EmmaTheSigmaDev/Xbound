@@ -1,6 +1,6 @@
-package me.XBound.xBound.managers;
+package me.RealsmileyXD.xBound.managers;
 
-import me.XBound.xBound.XBound;
+import me.RealsmileyXD.xBound.XBound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.file.FileConfiguration;

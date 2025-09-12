@@ -1,6 +1,6 @@
-package me.XBound.xBound.listeners;
+package me.RealsmileyXD.xBound.listeners;
 
-import me.XBound.xBound.XBound;
+import me.RealsmileyXD.xBound.XBound;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -42,7 +42,7 @@ public class MiningXpListener implements Listener {
         // World-specific multiplier
         String worldName = player.getWorld().getName();
         if (plugin.getConfig().isConfigurationSection("xp.multipliers.worlds")) {
-            if (plugin.getConfig().getConfigurationSection("xp.multipliers.worlds").contains(worldName)) {
+            if (Objects.requireNonNull(plugin.getConfig().getConfigurationSection("xp.multipliers.worlds")).contains(worldName)) {
                 double worldMult = plugin.getConfig().getDouble("xp.multipliers.worlds." + worldName, 1.0);
                 xp *= worldMult;
             }

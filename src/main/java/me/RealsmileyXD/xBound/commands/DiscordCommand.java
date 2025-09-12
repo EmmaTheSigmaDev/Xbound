@@ -1,5 +1,6 @@
-package me.XBound.xBound.commands;
+package me.RealsmileyXD.xBound.commands;
 
+import me.RealsmileyXD.xBound.XBound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -8,7 +9,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import me.XBound.xBound.XBound;
 import org.jetbrains.annotations.NotNull;
 
 public class DiscordCommand implements CommandExecutor {

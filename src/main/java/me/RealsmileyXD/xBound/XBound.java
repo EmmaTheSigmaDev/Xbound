@@ -1,6 +1,6 @@
-package me.XBound.xBound;
+package me.RealsmileyXD.xBound;
 
-import me.XBound.xBound.managers.MessageManager;
+import me.RealsmileyXD.xBound.managers.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
@@ -74,11 +74,11 @@ public final class XBound extends JavaPlugin {
         startBorderCheckTask();
         updateTablist();
 
-        Objects.requireNonNull(getCommand("xbound")).setExecutor(new me.XBound.xBound.commands.XBoundCommand(this, prefixes, suffixes));
-        Objects.requireNonNull(getCommand("discord")).setExecutor(new me.XBound.xBound.commands.DiscordCommand(this));
-        Objects.requireNonNull(getCommand("rules")).setExecutor(new me.XBound.xBound.commands.RulesCommand(this));
-        Bukkit.getPluginManager().registerEvents(new me.XBound.xBound.listeners.CoreListeners(this), this);
-        Bukkit.getPluginManager().registerEvents(new me.XBound.xBound.listeners.MiningXpListener(this), this);
+        Objects.requireNonNull(getCommand("xbound")).setExecutor(new me.RealsmileyXD.xBound.commands.XBoundCommand(this, prefixes, suffixes));
+        Objects.requireNonNull(getCommand("discord")).setExecutor(new me.RealsmileyXD.xBound.commands.DiscordCommand(this));
+        Objects.requireNonNull(getCommand("rules")).setExecutor(new me.RealsmileyXD.xBound.commands.RulesCommand(this));
+        Bukkit.getPluginManager().registerEvents(new me.RealsmileyXD.xBound.listeners.CoreListeners(this), this);
+        Bukkit.getPluginManager().registerEvents(new me.RealsmileyXD.xBound.listeners.MiningXpListener(this), this);
 
         webhookUrl = config.getString("webhook-url", "");
         getLogger().info("XBound enabled. Instance set. Global border operating on stored XP.");
@@ -274,7 +274,15 @@ public final class XBound extends JavaPlugin {
     }
 
     public synchronized void modifyStoredXp(UUID uuid, double delta) {
-        storedXp.put(uuid, Math.max(0, storedXp.getOrDefault(uuid, 0.0) + delta));
+        double newAmount = Math.max(0, storedXp.getOrDefault(uuid, 0.0) + delta);
+        storedXp.put(uuid, newAmount);
+
+        // also reward vanilla XP
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null && delta > 0) {
+            player.giveExp((int) Math.ceil(delta));
+        }
+
         updateBorder();
     }
 
